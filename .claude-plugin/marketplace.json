@@ -1,0 +1,16 @@
+{
+  "name": "imem-plugins",
+  "owner": {
+    "name": "iMem"
+  },
+  "description": "Official iMem plugins for Claude Code",
+  "plugins": [
+    {
+      "name": "imem",
+      "source": "./plugins/imem",
+      "description": "Save and retrieve durable memories, schedules, and reminders through iMem.",
+      "version": "0.1.0",
+      "category": "productivity"
+    }
+  ]
+}

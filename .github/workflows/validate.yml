@@ -1,0 +1,46 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate publication layout
+        run: python test/check_publication_layout.py
+
+      - name: Validate standalone repository boundary
+        run: python test/check_standalone_repository.py
+
+      - name: Validate package boundary
+        run: python test/check_package_boundary.py
+
+      - name: Validate remote MCP contract
+        run: python test/check_remote_mcp_contract.py
+
+      - name: Validate Plugin package
+        run: python test/check_plugin_package.py
+
+      - name: Check Plugin Skill mirror
+        run: python tools/sync_plugin_skill.py --check
+
+      - name: Compile Python files
+        run: |
+          python -m py_compile \
+            test/check_package_boundary.py \
+            test/check_plugin_package.py \
+            test/check_publication_layout.py \
+            test/check_remote_mcp_contract.py \
+            test/check_standalone_repository.py \
+            tools/sync_plugin_skill.py

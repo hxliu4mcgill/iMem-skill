@@ -1,0 +1,17 @@
+{
+  "contract_version": "2026-07-26",
+  "production_url": "https://imem.xin/mcp",
+  "transport": "streamable-http",
+  "authentication": "bearer-api-key",
+  "oauth_status": "pending",
+  "public_tools": [
+    "imem_health",
+    "imem_get_time_context",
+    "imem_search",
+    "imem_create_memory",
+    "imem_create_schedule",
+    "imem_create_reminder",
+    "imem_update_entry",
+    "imem_cancel_entry"
+  ]
+}

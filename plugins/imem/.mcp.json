@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "imem": {
+      "url": "https://imem.xin/mcp",
+      "bearer_token_env_var": "IMEM_API_KEY"
+    }
+  }
+}

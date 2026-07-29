@@ -1,0 +1,20 @@
+{
+  "name": "imem-plugins",
+  "interface": {
+    "displayName": "iMem Plugins"
+  },
+  "plugins": [
+    {
+      "name": "imem",
+      "source": {
+        "source": "local",
+        "path": "./plugins/imem"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

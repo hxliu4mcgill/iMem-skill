@@ -1,0 +1,28 @@
+{
+  "name": "imem",
+  "version": "0.1.0",
+  "description": "Save and retrieve durable memories, schedules, and reminders through iMem.",
+  "author": {
+    "name": "hxliu4mcgill",
+    "url": "https://github.com/hxliu4mcgill"
+  },
+  "homepage": "https://imem.xin",
+  "repository": "https://github.com/hxliu4mcgill/iMem-skill",
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "schedule",
+    "reminder",
+    "mcp"
+  ],
+  "mcpServers": "./.claude-mcp.json",
+  "userConfig": {
+    "api_key": {
+      "type": "string",
+      "title": "iMem API Key",
+      "description": "Create a Personal API Key at https://imem.xin/app/api-keys",
+      "sensitive": true,
+      "required": true
+    }
+  }
+}

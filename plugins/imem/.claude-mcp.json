@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "imem": {
+      "type": "http",
+      "url": "https://imem.xin/mcp",
+      "headers": {
+        "Authorization": "Bearer ${user_config.api_key}"
+      }
+    }
+  }
+}

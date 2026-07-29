@@ -1,0 +1,38 @@
+{
+  "name": "imem",
+  "version": "0.1.0",
+  "description": "Save and retrieve durable memories, schedules, and reminders through iMem.",
+  "author": {
+    "name": "hxliu4mcgill",
+    "url": "https://github.com/hxliu4mcgill"
+  },
+  "homepage": "https://imem.xin",
+  "repository": "https://github.com/hxliu4mcgill/iMem-skill",
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "schedule",
+    "reminder",
+    "mcp"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "iMem",
+    "shortDescription": "Durable memory, schedules, and reminders",
+    "longDescription": "Give Codex an authorized iMem workspace for saving and retrieving memories and managing schedules and reminders.",
+    "developerName": "iMem",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://imem.xin",
+    "defaultPrompt": [
+      "Remember this for me in iMem.",
+      "Find my recent iMem memories.",
+      "Schedule this and remind me beforehand."
+    ],
+    "brandColor": "#7C3AED"
+  }
+}
