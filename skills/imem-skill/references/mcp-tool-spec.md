@@ -26,14 +26,15 @@ implementation modules during normal Agent work.
 
 ## Resource Semantics
 
-Memory, Schedule, and Reminder are separate stored resources. Schedule and
-Reminder form one user-facing module.
+Memory, Schedule, Reminder, and Artifact are separate stored resources.
+Schedule and Reminder form one user-facing module.
 
 ```text
 save a fact or context                       -> imem_create_memory
 create a new schedule                        -> imem_create_schedule
 create a new reminder                        -> imem_create_schedule
 add another notification to an existing item -> imem_create_reminder
+upload a generated text/Markdown/HTML result  -> imem_upload_artifact
 ```
 
 Both new schedule wording and new reminder wording create a Schedule with its
@@ -48,6 +49,7 @@ the existing `schedule_id`.
 | `imem_get_time_context` | `entries:read` | Get current server/workspace time baseline |
 | `imem_search` | `entries:read` | Search memories, schedules, and reminders |
 | `imem_create_memory` | `entries:write` | Create a durable Memory |
+| `imem_upload_artifact` | `entries:write` | Upload a private text, Markdown, or HTML Artifact |
 | `imem_create_schedule` | `entries:write` | Create a Schedule and Reminder policies |
 | `imem_create_reminder` | `entries:write` | Add a Reminder policy to an existing Schedule |
 | `imem_update_entry` | `entries:write` | Update a selected entry |
@@ -95,6 +97,20 @@ tags?: string[]
 visibility?: string
 source?: object
 ```
+
+### `imem_upload_artifact`
+
+```text
+title: string
+content: string
+media_type: text/plain | text/markdown | text/html
+request_id: string
+idempotency_key: string
+```
+
+The created Artifact is always private and returns its owner URL. The tool does
+not accept a visibility parameter and cannot create or enable a Public Link.
+Only the user can enable public access in the authenticated iMem Web App.
 
 ### `imem_create_schedule`
 
@@ -193,7 +209,7 @@ Preserve `error.code`. Never present a failed write as successful.
 
 ## Idempotency and Recovery
 
-Create tools require both `request_id` and `idempotency_key`. Reuse the same
+Create and upload tools require both `request_id` and `idempotency_key`. Reuse the same
 idempotency key only when retrying the same intended create with identical
 arguments. A reused key with different arguments returns
 `IDEMPOTENCY_CONFLICT`.

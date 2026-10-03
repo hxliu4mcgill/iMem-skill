@@ -1,6 +1,6 @@
 ---
 name: imem-skill
-description: Use the authenticated iMem remote MCP service to save and search durable workspace memories and manage schedules and reminders. Trigger for requests to remember, recall, schedule, remind, update, cancel, or delete information stored in iMem.
+description: Use the authenticated iMem remote MCP service to save and search durable workspace memories, manage schedules and reminders, and upload text, Markdown, or HTML deliverables as private Artifacts. Trigger for requests to remember, recall, schedule, remind, update, cancel, delete, save a durable deliverable, or publish an Agent-generated artifact to iMem.
 ---
 
 # iMem Skill
@@ -32,6 +32,7 @@ search workspace memories, schedules, or reminders
 update an existing memory, schedule, or reminder
 cancel a schedule or reminder
 delete or archive a memory
+upload a text, Markdown, or HTML deliverable for durable viewing and sharing
 ```
 
 ## Choose The Capability
@@ -43,6 +44,7 @@ save a fact, note, reference, decision, preference, or context -> Memory
 make an explicit time arrangement                              -> Schedule + Reminder
 trigger or notify at an explicit time                          -> Schedule + Reminder
 add another trigger to an existing Schedule                    -> Reminder
+save an Agent deliverable or generated page                    -> Artifact
 ```
 
 A date is not enough by itself:
@@ -109,6 +111,7 @@ imem_health
 imem_get_time_context
 imem_search
 imem_create_memory
+imem_upload_artifact
 imem_create_schedule
 imem_create_reminder
 imem_update_entry
@@ -142,6 +145,8 @@ MCP server.
 9. Preserve MCP error codes. Do not present a failed write as successful.
 10. When a datetime is derived from a relative expression, call
     `imem_get_time_context` first and never reuse an earlier session baseline.
+11. Artifact uploads are always private. Never claim an Artifact is public or
+    attempt to enable its Public Link; only the user can do that in iMem.
 
 ## Minimal Workflows
 
@@ -153,6 +158,16 @@ Create memory:
 ```text
 health -> imem_create_memory
 ```
+
+Upload an Artifact:
+
+```text
+health -> imem_upload_artifact
+```
+
+Use `text/plain`, `text/markdown`, or `text/html`. Return the owner URL and
+state that the Artifact remains private until the user enables its Public Link
+in iMem.
 
 Create a new schedule or reminder:
 

@@ -1,12 +1,12 @@
 interface:
   display_name: "iMem"
-  short_description: "Save, recall, schedule, and remind through iMem."
-  default_prompt: "Use $imem-skill to save or retrieve a memory, schedule, or reminder."
+  short_description: "Save, recall, schedule, and share deliverables through iMem."
+  default_prompt: "Use $imem-skill to save or retrieve a memory, schedule, reminder, or private Artifact."
 
 dependencies:
   tools:
     - type: "mcp"
       value: "imem"
-      description: "Authenticated iMem workspace memory, schedule, and reminder tools"
+      description: "Authenticated iMem workspace memory, schedule, reminder, and Artifact tools"
       transport: "streamable_http"
       url: "https://imem.xin/mcp"
