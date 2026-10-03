@@ -1,5 +1,5 @@
 {
-  "contract_version": "2026-07-26",
+  "contract_version": "2026-10-02",
   "production_url": "https://imem.xin/mcp",
   "transport": "streamable-http",
   "authentication": "bearer-api-key",
@@ -9,6 +9,7 @@
     "imem_get_time_context",
     "imem_search",
     "imem_create_memory",
+    "imem_upload_artifact",
     "imem_create_schedule",
     "imem_create_reminder",
     "imem_update_entry",
