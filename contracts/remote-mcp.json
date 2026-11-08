@@ -1,18 +1,47 @@
 {
-  "contract_version": "2026-10-02",
+  "contract_version": "2026-11-02",
   "production_url": "https://imem.xin/mcp",
   "transport": "streamable-http",
   "authentication": "bearer-api-key",
   "oauth_status": "pending",
+  "canonical_tools": [
+    "imem_health",
+    "imem_get_time_context",
+    "imem_create_entry",
+    "imem_list_entries",
+    "imem_get_entry",
+    "imem_update_entry",
+    "imem_delete_entry",
+    "imem_list_entry_occurrences",
+    "imem_create_entry_reminder_rule",
+    "imem_update_entry_reminder_rule",
+    "imem_delete_entry_reminder_rule",
+    "imem_upload_artifact"
+  ],
+  "legacy_aliases": [
+    "imem_search",
+    "imem_create_memory",
+    "imem_create_schedule",
+    "imem_create_reminder",
+    "imem_cancel_entry"
+  ],
   "public_tools": [
     "imem_health",
     "imem_get_time_context",
+    "imem_create_entry",
+    "imem_list_entries",
+    "imem_get_entry",
+    "imem_update_entry",
+    "imem_delete_entry",
+    "imem_list_entry_occurrences",
+    "imem_create_entry_reminder_rule",
+    "imem_update_entry_reminder_rule",
+    "imem_delete_entry_reminder_rule",
+    "imem_upload_artifact",
     "imem_search",
     "imem_create_memory",
-    "imem_upload_artifact",
     "imem_create_schedule",
     "imem_create_reminder",
-    "imem_update_entry",
     "imem_cancel_entry"
   ]
 }

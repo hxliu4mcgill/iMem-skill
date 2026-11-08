@@ -17,8 +17,8 @@
 一个独立于任何单一 AI 的长期记忆空间。记录一次，持续存在，让不同的授权 AI
 理解你的世界。
 
-iMem 让记忆、日程和提醒跨越单次对话或单一 AI 持续发挥作用，同时由你决定哪些
-集成可以访问它们。
+iMem 让持久笔记与日程 Entry 跨越单次对话或单一 AI 持续发挥作用。日程详情和
+提醒规则归属于同一个稳定 Entry ID，同时由你决定哪些集成可以访问它们。
 
 **Web App：** [https://imem.xin](https://imem.xin)
 
@@ -40,9 +40,9 @@ iMem 让记忆、日程和提醒跨越单次对话或单一 AI 持续发挥作�
 
 更换 AI，不应该意味着失去你的上下文。
 
-iMem 将记忆和日程保存在长期工作区中，让不同的授权 Agent 都能基于同一份上下文
-继续工作。你的记忆不绑定于任何单一 AI 产品，每个集成都可以使用独立、可撤销的
-Personal API Key。
+iMem 将笔记与日程 Entry 保存在长期工作区中，让不同的授权 Agent 都能基于同一份
+上下文继续工作。你的上下文不绑定于任何单一 AI 产品，每个集成都可以使用独立、
+可撤销的 Personal API Key。
 
 `iMem-skill` 是 Agent 接入这一体验的连接层。它告诉 Agent 何时以及如何保存、
 查找和更新上下文，远程 MCP 服务则提供实时工具；Skill 本身并不存储你的数据。
@@ -74,6 +74,11 @@ Personal API Key。
 
 Skill 告诉 Agent 何时以及如何使用 iMem；远程 MCP 提供实时工具，并根据 API Key
 确定数据所属工作区。Skill 本身不存储用户数据。
+
+Agent 的统一模型是一个 `Entry(kind=note|schedule)` 和一个 `entry_id`。日程时间放在
+`schedule_details`，零个或多个 `reminder_rules` 归属于该日程 Entry。旧 Memory、
+Schedule、Reminder 工具继续作为迁移期兼容别名保留，但新版 Skill 默认使用统一
+Entry 工具。
 
 ## 快速开始
 
@@ -239,9 +244,10 @@ codex mcp add imem --url https://imem.xin/mcp --bearer-token-env-var IMEM_API_KE
 ## 兼容性
 
 ```text
-Skill 版本：v0.1.0
+Skill 版本：v0.2.0
 Skill 名称：imem-skill
 生产 MCP：https://imem.xin/mcp
+生产 MCP 合同：2026-11-02
 认证方式：Personal API Key Bearer Token
 OAuth：pending
 ```

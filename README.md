@@ -17,8 +17,9 @@
 A long-term memory space for you and the AI Agents you trust.
 Capture once. Remember everywhere. Let authorized AI understand your world.
 
-iMem keeps memories, schedules, and reminders useful beyond a single
-conversation or AI, while you control which integrations can access them.
+iMem keeps durable note and schedule Entries useful beyond a single
+conversation or AI. Schedule details and reminder rules stay together under
+one stable Entry ID, while you control which integrations can access them.
 
 **Web App:** [https://imem.xin](https://imem.xin)
 
@@ -41,8 +42,8 @@ conversation or AI, while you control which integrations can access them.
 
 Changing AI should not mean losing your context.
 
-iMem keeps memories and schedules in a long-term workspace so different
-authorized Agents can continue from the same context. Your memory remains
+iMem keeps note and schedule Entries in a long-term workspace so different
+authorized Agents can continue from the same context. Your context remains
 independent of any single AI product, and each integration can use its own
 revocable Personal API Key.
 
@@ -78,6 +79,12 @@ You
 The Skill tells the Agent when and how to use iMem. The remote MCP server
 provides the live tools and stores data in the workspace selected by the API
 key. The Skill itself does not store user data.
+
+The canonical Agent model is one `Entry(kind=note|schedule)` and one
+`entry_id`. Schedule timing lives in `schedule_details`; zero or more
+`reminder_rules` belong to that Schedule Entry. Legacy Memory, Schedule, and
+Reminder tools remain temporary compatibility aliases, but new Skill workflows
+use the unified Entry tools.
 
 ## Quick Start
 
@@ -256,9 +263,10 @@ A planned or protocol-compatible platform is not an installable promise.
 ## Compatibility
 
 ```text
-Skill release: v0.1.0
+Skill release: v0.2.0
 Skill name: imem-skill
 Production MCP: https://imem.xin/mcp
+Production MCP contract: 2026-11-02
 Authentication: Personal API Key bearer token
 OAuth: pending
 ```

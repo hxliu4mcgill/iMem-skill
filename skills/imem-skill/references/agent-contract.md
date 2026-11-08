@@ -1,28 +1,31 @@
 # iMem Agent Contract
 
-This is the Agent-side copy of the iMem behavior contract. It keeps the
-standalone `iMem-skill` package usable without requiring service-source access.
+Use this contract with the authenticated production MCP at
+`https://imem.xin/mcp`. Read `mcp-tool-spec.md` for exact parameters and
+`product-language.md` for terminology.
 
-For tool details, read:
+## Domain Contract
 
-```text
-mcp-tool-spec.md
-```
-
-Memory, Schedule, Reminder, and Artifact are separate service resources.
-Schedule and Reminder form one user-facing module. New schedule and reminder
-requests both create a Schedule with an attached Reminder. Direct Reminder
-creation is only for adding another Reminder to an existing Schedule.
-
-## Stable Agent Surface
-
-Use iMem through this surface:
+Every independently manageable note or schedule is one Entry with one stable
+`entry_id`:
 
 ```text
-Authenticated remote MCP tools at https://imem.xin/mcp
+Entry(kind=note)     -> schedule_details=null, reminder_rules=[]
+Entry(kind=schedule) -> schedule_details object, reminder_rules array
 ```
 
-Do not use service internals for normal Agent work:
+ScheduleDetails belong one-to-one to a Schedule Entry. Reminder Rules belong
+zero-to-many to a Schedule Entry and are not top-level Entries. Occurrences use
+`entry_id` and `occurrence_id`; they do not require legacy Memory or Schedule
+IDs. Artifact remains a separate private deliverable resource.
+
+## Authentication And Workspace
+
+Use Personal API Key bearer authentication over Streamable HTTP. Let the
+service derive `user_id`, `workspace_id`, client identity, and scopes from the
+key. Never pass `workspace_id` in normal Agent calls. OAuth remains pending.
+
+Do not use service internals during normal work:
 
 ```text
 data/
@@ -32,85 +35,42 @@ scripts/*.py
 memory_service.operations
 ```
 
-## Authentication And Workspace
-
-Protected calls use:
-
-```text
-Authorization: Bearer <api-key>
-```
-
-The service resolves the API key to a tenant context:
-
-```text
-user_id
-workspace_id
-client_id
-client_name
-scopes
-```
-
-Agents must not pass `workspace_id` in normal workflows. Workspace isolation is
-derived from the API key.
-
-The production remote MCP uses Streamable HTTP with Personal API Key bearer
-authentication. OAuth is pending.
-
 ## Required Behavior
 
-1. Run health check before user-visible work when practical.
-2. Create operations require `request_id` and `idempotency_key`.
-3. Search before update unless the exact target ID is already confirmed.
-4. Search before cancel/delete unless the exact target ID is already confirmed.
-5. Ask the user to choose when search returns multiple plausible targets.
-6. Do not guess IDs when search finds no target.
-7. Preserve service error codes and do not present failed writes as successful.
-8. Call `imem_get_time_context` before resolving relative dates. Use its
-   `server_time` and `workspace_timezone`, and never reuse an earlier session
-   baseline.
+1. Run `imem_health` before user-visible work when practical.
+2. Call `imem_get_time_context` before resolving relative dates and use a fresh
+   `server_time` and `workspace_timezone` for each operation.
+3. Include `request_id` on mutations.
+4. Include `idempotency_key` on Entry, Reminder Rule, and Artifact creates.
+5. List or get an Entry before mutation unless its exact `entry_id` is already
+   confirmed.
+6. Ask the user to choose when multiple plausible Entries match.
+7. Never guess `entry_id` or `rule_id`.
+8. Keep Entry `kind` immutable and nest Schedule changes under
+   `schedule_details`.
+9. Preserve service error codes and never report a failed write as successful.
 
 ## Intent Routing
 
-Select the capability from the user's requested outcome:
-
 ```text
-Fact, note, reference, decision, preference, or context
--> imem_create_memory
+fact, note, reference, decision, preference, or context
+-> imem_create_entry(kind=note)
 
-Explicit time arrangement
--> imem_create_schedule with reminders
+explicit time arrangement
+-> imem_create_entry(kind=schedule, schedule_details=...)
 
-Explicit timed trigger or notification
--> imem_create_schedule with reminders
+new timed reminder
+-> imem_create_entry(kind=schedule, reminder_rules=[...])
 
-Additional trigger for an existing Schedule
--> imem_create_reminder with the confirmed schedule_id
+additional reminder for an existing Schedule Entry
+-> imem_create_entry_reminder_rule(entry_id=...)
 
-Agent-generated text, Markdown, or HTML deliverable
+generated text, Markdown, or HTML deliverable
 -> imem_upload_artifact
 ```
 
-Do not route solely from extracted dates:
-
-```text
-"The decision was made on June 12." -> Memory
-"Schedule the review for June 12."   -> Schedule + Reminder
-"Remind me on June 12."              -> Schedule + Reminder
-```
-
-Rules:
-
-1. Descriptive or historical dates do not imply a Schedule.
-2. New schedule and reminder requests use one `imem_create_schedule` call with
-   an attached reminder.
-3. Use `imem_create_reminder` only after selecting an existing Schedule.
-4. Ask for clarification when save and time-based behavior are materially
-   different plausible outcomes.
-5. Do not assume a family workspace or family relationships.
-
-Reminder policies attached to a Schedule use `offset_minutes`, `channel`,
-`message_override`, and `is_default`. The production `imem_create_reminder`
-tool uses the same policy fields and requires a confirmed `schedule_id`.
+Do not route solely from extracted dates. Descriptive or historical dates stay
+in a note unless the user asks for time-based behavior.
 
 ## Scope Matrix
 
@@ -118,68 +78,79 @@ tool uses the same policy fields and requires a confirmed `schedule_id`.
 |---|---|---|
 | Health | `imem_health` | `entries:read` |
 | Time baseline | `imem_get_time_context` | `entries:read` |
-| Search entries | `imem_search` | `entries:read` |
-| Create memory | `imem_create_memory` | `entries:write` |
+| Create Entry | `imem_create_entry` | `entries:write` |
+| List Entries | `imem_list_entries` | `entries:read` |
+| Get Entry | `imem_get_entry` | `entries:read` |
+| Update Entry | `imem_update_entry` | `entries:write` |
+| Delete/cancel Entry | `imem_delete_entry` | `entries:write` |
+| List occurrences | `imem_list_entry_occurrences` | `entries:read` |
+| Create Reminder Rule | `imem_create_entry_reminder_rule` | `entries:write` |
+| Update Reminder Rule | `imem_update_entry_reminder_rule` | `entries:write` |
+| Delete Reminder Rule | `imem_delete_entry_reminder_rule` | `entries:write` |
 | Upload private Artifact | `imem_upload_artifact` | `entries:write` |
-| Create schedule | `imem_create_schedule` | `entries:write` |
-| Add reminder to a schedule | `imem_create_reminder` | `entries:write` |
-| Update entry | `imem_update_entry` | `entries:write` |
-| Delete/cancel entry | `imem_cancel_entry` | `entries:write` |
 
-The production remote MCP exposes normal entry, Artifact upload, and
-time-context tools.
-Operation logs, exports, API-key administration, scheduler scans, and delivery
-operations remain outside that MCP surface.
+Exports, operation logs, API-key administration, scheduler scans, and delivery
+operations remain outside the public MCP surface.
 
 ## Idempotency
 
-Idempotency is supported for:
+Use idempotency for:
 
 ```text
-imem_create_memory
+imem_create_entry
+imem_create_entry_reminder_rule
 imem_upload_artifact
-imem_create_schedule
-imem_create_reminder
 ```
 
-Reuse the same key and same body only for retrying the same intended create.
-If the object changes, confirm the new intent and use a new key. Reusing a key
-with a different request produces `IDEMPOTENCY_CONFLICT`.
+Reuse the same key only to retry the identical intended create. A different
+body with the same key returns `IDEMPOTENCY_CONFLICT`. After an uncertain
+update or delete, read current state before retrying.
+
+## Update And Delete
+
+Use `imem_update_entry(entry_id=...)` with common fields at the top level and
+Schedule fields inside `patch.schedule_details`. Never patch `id` or `kind`.
+
+Use `imem_delete_entry` for soft deletion. A note becomes deleted. A Schedule
+Entry becomes canceled/deleted together with its active Reminder Rules
+according to service policy. Do not physically delete storage rows or files.
+
+Manage Reminder Rules through the nested create, update, and delete tools. A
+Reminder Rule mutation requires both the owning Schedule `entry_id` and the
+rule's `rule_id` where applicable.
 
 ## Artifact Upload
 
-Use `imem_upload_artifact` for complete deliverables that should remain
-readable as text, Markdown, or rendered HTML. Every upload starts private. The
-Agent must not claim it is publicly accessible or try to change visibility;
-the user enables and disables the Public Link in the authenticated iMem App.
+Use `imem_upload_artifact` for complete text, Markdown, or HTML deliverables.
+Every upload starts private. Do not claim it is public or try to enable a
+Public Link; only the user can do that in the authenticated iMem App.
 
-## Update, Delete, And Cancel
+## Compatibility
 
-Update only after selecting a clear target from search or a confirmed current
-tool response.
+The following tools remain temporary migration aliases:
 
-Deletion is soft state transition:
+```text
+imem_search
+imem_create_memory
+imem_create_schedule
+imem_create_reminder
+imem_cancel_entry
+```
 
-| Entity type | User wording | Service behavior |
-|---|---|---|
-| `memory` | delete or archive | status becomes deleted |
-| `schedule` | cancel | status becomes canceled; related reminders are canceled |
-| `reminder` | cancel | status becomes canceled |
-
-Do not physically delete rows, files, or JSONL lines.
+`imem_update_entry` also accepts the legacy `entity_type + entity_id` form.
+New Agent workflows must use canonical tools and `entry_id` only. Do not remove
+or recommend legacy aliases until a separate deprecation contract authorizes
+it.
 
 ## Failure Handling
 
 | Error code | Required Agent behavior |
 |---|---|
 | `UNAUTHORIZED` | Ask the user/operator to check API key configuration. |
-| `FORBIDDEN` | Report that the current key lacks the required scope. |
-| `ENTRY_NOT_FOUND` | Search again or ask the user to identify the target. Do not guess IDs. |
-| `VALIDATION_FAILED` | Fix fields if clear, otherwise ask for missing information. |
-| `INVALID_ENTITY_TYPE` | Use only `memory`, `schedule`, or `reminder`. |
-| `IDEMPOTENCY_CONFLICT` | Do not retry the same key. Confirm intent before creating a new key. |
+| `FORBIDDEN` | Report the missing scope. |
+| `ENTRY_NOT_FOUND` | List again or ask the user to identify the target. |
+| `VALIDATION_FAILED` | Fix clear fields or ask for missing information. |
+| `INVALID_ENTRY_KIND` | Use `note` or `schedule`. |
+| `IDEMPOTENCY_CONFLICT` | Do not retry the same key; confirm intent. |
 | `CONFIGURATION_ERROR` | Check the MCP URL and host configuration. |
-| `MCP_TOOL_ERROR` | Inspect the structured error. Do not assume the write succeeded. |
-
-Scheduler scans, delivery logs, and real notification channels are outside the
-normal Agent surface unless explicitly implemented and documented.
+| `MCP_TOOL_ERROR` | Treat the outcome as failed or uncertain. |
