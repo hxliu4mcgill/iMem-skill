@@ -8,8 +8,8 @@
     {
       "name": "imem",
       "source": "./plugins/imem",
-      "description": "Save and retrieve durable memories, schedules, and reminders through iMem.",
-      "version": "0.1.0",
+      "description": "Create and manage durable note and schedule Entries through iMem.",
+      "version": "0.2.0",
       "category": "productivity"
     }
   ]

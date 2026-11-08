@@ -1,6 +1,7 @@
 # iMem Remote MCP Tool Specification
 
-This is the public Agent contract for the production iMem remote MCP service.
+This is the public Agent contract for production iMem remote MCP contract
+`2026-11-02`.
 
 ## Production Connection
 
@@ -11,92 +12,218 @@ Authentication: Authorization: Bearer <personal-api-key>
 OAuth: pending
 ```
 
-Create a Personal API Key after registering and signing in at
-`https://imem.xin/app/api-keys`. The service derives the user and workspace from
-that key. Never pass `workspace_id` in normal Agent requests.
+Create a Personal API Key at `https://imem.xin/app/api-keys`. The service
+derives user and workspace identity from that key. Never pass `workspace_id` in
+normal Agent requests.
 
-The only normal Skill call chain is:
+## Canonical Resource Shape
 
-```text
-Agent -> https://imem.xin/mcp -> iMem service
+```json
+{
+  "id": "MEM-20261101-001",
+  "kind": "schedule",
+  "title": "Product review",
+  "content": "Review the launch scope",
+  "category": "Work",
+  "owner": "agent",
+  "members": [],
+  "tags": [],
+  "visibility": "private",
+  "source": {"type": "agent"},
+  "status": "pending",
+  "created_at": "2026-11-01T09:00:00",
+  "updated_at": null,
+  "deleted_at": null,
+  "schedule_details": {
+    "start_time": "2026-11-05T10:00:00+08:00",
+    "end_time": "2026-11-05T11:00:00+08:00",
+    "location": "",
+    "participants": [],
+    "notes": "",
+    "recurrence": null,
+    "timezone": "Asia/Shanghai",
+    "next_occurrence_at": "2026-11-05T02:00:00Z",
+    "revision": 1
+  },
+  "reminder_rules": []
+}
 ```
 
-Never access SQLite, JSONL, server data directories, scripts, or service
-implementation modules during normal Agent work.
+`schedule_details` is `null` and `reminder_rules` is empty for a note Entry.
+Reminder Rules are nested under Schedule Entries. Occurrences expose
+`entry_id` and `occurrence_id`, never legacy identity as the canonical key.
 
-## Resource Semantics
+## Canonical Production Tools
 
-Memory, Schedule, Reminder, and Artifact are separate stored resources.
-Schedule and Reminder form one user-facing module.
-
-```text
-save a fact or context                       -> imem_create_memory
-create a new schedule                        -> imem_create_schedule
-create a new reminder                        -> imem_create_schedule
-add another notification to an existing item -> imem_create_reminder
-upload a generated text/Markdown/HTML result  -> imem_upload_artifact
-```
-
-Both new schedule wording and new reminder wording create a Schedule with its
-Reminder policies. Call `imem_create_reminder` only after finding or confirming
-the existing `schedule_id`.
-
-## Production MCP Tools
-
-| Tool | Required scope | Purpose |
+| Tool | Scope | Purpose |
 |---|---|---|
-| `imem_health` | `entries:read` | Verify authenticated service access |
-| `imem_get_time_context` | `entries:read` | Get current server/workspace time baseline |
-| `imem_search` | `entries:read` | Search memories, schedules, and reminders |
-| `imem_create_memory` | `entries:write` | Create a durable Memory |
+| `imem_health` | `entries:read` | Verify authenticated service access and contract version |
+| `imem_get_time_context` | `entries:read` | Get authoritative server and workspace time |
+| `imem_create_entry` | `entries:write` | Create a note or Schedule Entry |
+| `imem_list_entries` | `entries:read` | List and filter Entries |
+| `imem_get_entry` | `entries:read` | Read one Entry by canonical ID |
+| `imem_update_entry` | `entries:write` | Patch one Entry |
+| `imem_delete_entry` | `entries:write` | Soft-delete or cancel one Entry |
+| `imem_list_entry_occurrences` | `entries:read` | Read Schedule occurrences for a range |
+| `imem_create_entry_reminder_rule` | `entries:write` | Add a Reminder Rule to a Schedule Entry |
+| `imem_update_entry_reminder_rule` | `entries:write` | Patch a nested Reminder Rule |
+| `imem_delete_entry_reminder_rule` | `entries:write` | Delete/cancel a nested Reminder Rule |
 | `imem_upload_artifact` | `entries:write` | Upload a private text, Markdown, or HTML Artifact |
-| `imem_create_schedule` | `entries:write` | Create a Schedule and Reminder policies |
-| `imem_create_reminder` | `entries:write` | Add a Reminder policy to an existing Schedule |
-| `imem_update_entry` | `entries:write` | Update a selected entry |
-| `imem_cancel_entry` | `entries:write` | Cancel or soft-delete a selected entry |
-
-The production remote MCP intentionally does not expose export, operation-log,
-API-key administration, scheduler, or delivery tools.
 
 ## Tool Parameters
 
 ### `imem_health`
 
-No parameters.
+No parameters. Verify `data.status`, `data.mcp_url`, and
+`data.contract_version`.
 
 ### `imem_get_time_context`
 
-No parameters. Use `data.server_time` and `data.workspace_timezone` as the
-authoritative baseline for relative dates.
+No parameters. Use `data.server_time` and `data.workspace_timezone` before
+resolving relative dates or times.
 
-### `imem_search`
-
-```text
-q?: string
-entity_type?: memory | schedule | reminder
-start_date?: YYYY-MM-DD
-end_date?: YYYY-MM-DD
-category?: string
-status?: string
-month?: YYYY-MM
-limit?: number
-include_related?: boolean
-```
-
-### `imem_create_memory`
+### `imem_create_entry`
 
 ```text
+kind: note | schedule
 title: string
-content: string
 request_id: string
 idempotency_key: string
+content?: string
 category?: string
 owner?: string
 members?: string[]
 tags?: string[]
 visibility?: string
 source?: object
+status?: string
+created_at?: ISO datetime
+schedule_details?: object
+reminder_rules?: object[]
 ```
+
+For `kind=schedule`, set `schedule_details.start_time` and optionally:
+
+```text
+end_time?: ISO datetime
+location?: string
+participants?: string[]
+notes?: string
+recurrence?: object
+timezone?: IANA timezone
+```
+
+For `kind=note`, omit schedule details and reminder rules. Return
+`data.entry`.
+
+### `imem_list_entries`
+
+```text
+kind?: note | schedule
+q?: string
+status?: string
+scheduled_from?: ISO datetime
+scheduled_to?: ISO datetime
+include_deleted?: boolean
+limit?: integer
+offset?: integer
+```
+
+Return `data.entries`, `data.total`, `data.limit`, and `data.offset`.
+
+### `imem_get_entry`
+
+```text
+entry_id: string
+```
+
+Return `data.entry` or `ENTRY_NOT_FOUND`.
+
+### `imem_update_entry`
+
+Canonical input:
+
+```text
+entry_id: string
+patch: object
+request_id: string
+```
+
+Do not set `id` or `kind`. Nest Schedule changes under
+`patch.schedule_details`. Return `data.entry`.
+
+During migration, the tool also accepts this mutually exclusive legacy form:
+
+```text
+entity_type: memory | schedule | reminder
+entity_id: string
+patch: object
+request_id: string
+```
+
+New integrations must use `entry_id`.
+
+### `imem_delete_entry`
+
+```text
+entry_id: string
+reason: string
+request_id: string
+```
+
+Perform a soft delete/cancel and return `data.entry`.
+
+### `imem_list_entry_occurrences`
+
+```text
+start: ISO datetime
+end: ISO datetime
+limit?: integer
+```
+
+Return `data.occurrences`. Each item uses canonical `entry_id` plus an
+occurrence-specific `occurrence_id`.
+
+### `imem_create_entry_reminder_rule`
+
+```text
+entry_id: string
+request_id: string
+idempotency_key: string
+remind_at?: ISO datetime
+offset_minutes?: integer
+channel?: string
+is_default?: boolean
+status?: string
+message?: string
+title?: string
+notification_endpoint_id?: string
+```
+
+Use only with a Schedule Entry and provide a valid timing rule. Return the
+updated `data.entry`.
+
+### `imem_update_entry_reminder_rule`
+
+```text
+entry_id: string
+rule_id: string
+patch: object
+request_id: string
+```
+
+Return the updated `data.entry`.
+
+### `imem_delete_entry_reminder_rule`
+
+```text
+entry_id: string
+rule_id: string
+reason: string
+request_id: string
+```
+
+Return the updated `data.entry`.
 
 ### `imem_upload_artifact`
 
@@ -108,77 +235,10 @@ request_id: string
 idempotency_key: string
 ```
 
-The created Artifact is always private and returns its owner URL. The tool does
-not accept a visibility parameter and cannot create or enable a Public Link.
-Only the user can enable public access in the authenticated iMem Web App.
+The Artifact is private and returns an owner URL. The tool cannot enable a
+Public Link.
 
-### `imem_create_schedule`
-
-```text
-title: string
-start_time: ISO datetime
-request_id: string
-idempotency_key: string
-end_time?: ISO datetime
-location?: string
-category?: string
-participants?: string[]
-notes?: string
-memory_id?: string
-memory?: object
-reminders?: object[]
-recurrence?: object
-timezone?: IANA timezone
-```
-
-Reminder policies inside `reminders` use:
-
-```text
-offset_minutes: integer
-channel?: string
-message_override?: string
-is_default?: boolean
-```
-
-Use a fresh `imem_get_time_context` result before resolving relative
-`start_time` or `end_time`. The canonical recurrence object uses `version`,
-`frequency`, and optional fields such as `interval`, `by_weekday`,
-`by_monthday`, `count`, or `until`.
-
-### `imem_create_reminder`
-
-```text
-schedule_id: string
-offset_minutes: integer
-request_id: string
-idempotency_key: string
-channel?: string
-message_override?: string
-is_default?: boolean
-```
-
-This tool adds another notification policy to an existing Schedule. Search for
-and confirm the Schedule before calling it.
-
-### `imem_update_entry`
-
-```text
-entity_type: memory | schedule | reminder
-entity_id: string
-patch: object
-request_id: string
-```
-
-### `imem_cancel_entry`
-
-```text
-entity_type: memory | schedule | reminder
-entity_id: string
-reason: string
-request_id: string
-```
-
-## MCP Return Format
+## Return Envelope
 
 Success:
 
@@ -197,35 +257,47 @@ Failure:
 {
   "ok": false,
   "data": null,
-  "error": {
-    "code": "VALIDATION_FAILED",
-    "message": "..."
-  },
+  "error": {"code": "VALIDATION_FAILED", "message": "..."},
   "source": "imem-remote-mcp"
 }
 ```
 
 Preserve `error.code`. Never present a failed write as successful.
 
-## Idempotency and Recovery
+## Idempotency And Recovery
 
-Create and upload tools require both `request_id` and `idempotency_key`. Reuse the same
-idempotency key only when retrying the same intended create with identical
-arguments. A reused key with different arguments returns
+`imem_create_entry`, `imem_create_entry_reminder_rule`, and
+`imem_upload_artifact` require both `request_id` and `idempotency_key`. Reuse a
+key only for an identical retry. Different arguments with the same key return
 `IDEMPOTENCY_CONFLICT`.
 
-After an uncertain update or cancel failure, search current state before
-retrying. When search returns multiple plausible targets, ask the user to
-choose. Never guess an ID.
+After an uncertain update or delete, read current state before retrying. Ask
+the user to choose when a list returns multiple plausible targets.
+
+## Migration Aliases
+
+Production temporarily retains:
+
+```text
+imem_search
+imem_create_memory
+imem_create_schedule
+imem_create_reminder
+imem_cancel_entry
+```
+
+These aliases preserve older integrations. New Skill workflows must use the
+canonical Entry tools. Do not remove aliases before a separately approved
+deprecation and telemetry review.
 
 ## Error Handling
 
 | Error code | Required behavior |
 |---|---|
-| `UNAUTHORIZED` | Ask the user to check the configured API key. |
+| `UNAUTHORIZED` | Check the configured API key. |
 | `FORBIDDEN` | Report the missing scope. |
-| `ENTRY_NOT_FOUND` | Search again or ask the user to identify the target. |
-| `VALIDATION_FAILED` | Correct clear field errors or ask for missing information. |
-| `INVALID_ENTITY_TYPE` | Use only `memory`, `schedule`, or `reminder`. |
-| `IDEMPOTENCY_CONFLICT` | Do not retry with that key; confirm intent first. |
-| `MCP_TOOL_ERROR` | Treat the outcome as failed or uncertain; never claim success. |
+| `ENTRY_NOT_FOUND` | List again or ask the user to identify the Entry. |
+| `VALIDATION_FAILED` | Correct clear fields or ask for missing information. |
+| `INVALID_ENTRY_KIND` | Use `note` or `schedule`. |
+| `IDEMPOTENCY_CONFLICT` | Do not retry with that key; confirm intent. |
+| `MCP_TOOL_ERROR` | Treat the outcome as failed or uncertain. |
