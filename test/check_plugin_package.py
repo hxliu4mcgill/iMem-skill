@@ -18,9 +18,20 @@ CLAUDE_MARKETPLACE_PATH = ROOT / ".claude-plugin" / "marketplace.json"
 CODEBUDDY_MARKETPLACE_PATH = ROOT / ".codebuddy-plugin" / "marketplace.json"
 WORKBUDDY_MARKETPLACE_PATH = ROOT / ".workbuddy-plugin" / "marketplace.json"
 CONTRACT_PATH = ROOT / "contracts" / "remote-mcp.json"
+PACKAGE_SOURCES_PATH = ROOT / "contracts" / "package-sources.json"
 OPENAI_PATH = ROOT / "skills" / "imem-skill" / "agents" / "openai.yaml"
 CANONICAL_SKILL = ROOT / "skills" / "imem-skill"
 PLUGIN_SKILL = PLUGIN_ROOT / "skills" / "imem-skill"
+SYNC_TOOL_PATH = ROOT / "tools" / "sync_plugin_skill.py"
+
+EXPECTED_PACKAGE_SOURCES = {
+    "schema_version": 1,
+    "repository_role": "only-official-package-source",
+    "canonical_skill": "skills/imem-skill",
+    "generated_skill_mirrors": ["plugins/imem/skills/imem-skill"],
+    "plugin_package_roots": ["plugins/imem"],
+    "excluded_legacy_copy_names": ["red-skill"],
+}
 
 
 def _file_map(root: Path) -> dict[str, bytes]:
@@ -52,6 +63,44 @@ def main() -> int:
         ),
     }
     contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
+    package_sources = json.loads(
+        PACKAGE_SOURCES_PATH.read_text(encoding="utf-8")
+    )
+
+    if package_sources != EXPECTED_PACKAGE_SOURCES:
+        violations.append(
+            "package-sources.json differs from the official package-source contract"
+        )
+
+    excluded_names = set(package_sources.get("excluded_legacy_copy_names") or [])
+    package_selectors = [
+        CODEX_PLUGIN_PATH,
+        CODEX_MARKETPLACE_PATH,
+        CLAUDE_PLUGIN_PATH,
+        CLAUDE_MARKETPLACE_PATH,
+        CODEBUDDY_MARKETPLACE_PATH,
+        WORKBUDDY_MARKETPLACE_PATH,
+        ROOT / ".github" / "workflows" / "validate.yml",
+        SYNC_TOOL_PATH,
+    ]
+    for excluded_name in excluded_names:
+        if (ROOT / excluded_name).exists():
+            violations.append(
+                f"excluded legacy copy must remain outside the repository: {excluded_name}"
+            )
+        for selector in package_selectors:
+            if excluded_name in selector.read_text(encoding="utf-8"):
+                violations.append(
+                    f"{selector.relative_to(ROOT)} selects excluded legacy copy: "
+                    f"{excluded_name}"
+                )
+
+    for archive in ROOT.rglob("*.zip"):
+        if "__pycache__" not in archive.parts:
+            violations.append(
+                "prebuilt archive must not be committed as a package source: "
+                f"{archive.relative_to(ROOT)}"
+            )
 
     for key in ("name", "version", "description", "author", "interface"):
         if not codex_plugin.get(key):
