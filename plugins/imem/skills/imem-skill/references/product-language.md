@@ -15,7 +15,9 @@ Artifact             private generated deliverable, separate from Entry
 ```
 
 Use `schedule_details` and `reminder_rules` as the canonical wire-field names
-when documenting or debugging the MCP contract.
+when documenting or debugging the MCP contract. Use `revision` for the current
+Entry or Reminder Rule version and `expected_revision` for the version a
+canonical update expects to replace.
 
 Use one stable `entry_id` for create, list, detail, update, delete, occurrence,
 and reminder-rule workflows. Do not ask an Agent to correlate `memory_id` with
@@ -35,7 +37,10 @@ iMem                    instead of family schedule assistant
 ```
 
 The user does not need to know the internal `Entry` term unless it helps
-explain IDs, API behavior, or a mixed note-and-schedule list.
+explain IDs, API behavior, or a mixed note-and-schedule list. On
+`REVISION_CONFLICT`, say that the item changed in another client after it was
+read. Show the latest state and ask whether to retry or merge; do not describe
+an automatic overwrite as safe.
 
 ## Default Assumptions
 

@@ -43,6 +43,17 @@ FORBIDDEN_USER_MCP_TOOLS = {
     "imem_get_operations",
 }
 
+EXPECTED_OPTIMISTIC_CONCURRENCY = {
+    "revision_field": "revision",
+    "expected_revision_parameter": "expected_revision",
+    "canonical_update_tools": [
+        "imem_update_entry",
+        "imem_update_entry_reminder_rule",
+    ],
+    "conflict_error": "REVISION_CONFLICT",
+    "skill_requires_expected_revision": True,
+}
+
 
 def main() -> int:
     violations: list[str] = []
@@ -61,6 +72,8 @@ def main() -> int:
         violations.append("contract authentication must be bearer-api-key")
     if contract.get("oauth_status") != "pending":
         violations.append("contract oauth_status must be pending")
+    if contract.get("optimistic_concurrency") != EXPECTED_OPTIMISTIC_CONCURRENCY:
+        violations.append("contract optimistic_concurrency differs from revision contract")
 
     if canonical_tools != EXPECTED_CANONICAL_TOOLS:
         violations.append("canonical_tools differs from the unified Entry contract")
@@ -87,6 +100,8 @@ def main() -> int:
         "entry_id",
         "schedule_details",
         "reminder_rules",
+        "expected_revision",
+        "REVISION_CONFLICT",
         "migration aliases only",
     ]:
         if required not in skill_text:
@@ -103,14 +118,38 @@ def main() -> int:
 
     reference_texts = {
         AGENT_CONTRACT_PATH: AGENT_CONTRACT_PATH.read_text(encoding="utf-8"),
+        API_SPEC_PATH: API_SPEC_PATH.read_text(encoding="utf-8"),
         PRODUCT_LANGUAGE_PATH: PRODUCT_LANGUAGE_PATH.read_text(encoding="utf-8"),
     }
     for path, text in reference_texts.items():
-        for required in ["entry_id", "schedule_details", "reminder_rules"]:
+        for required in [
+            "entry_id",
+            "schedule_details",
+            "reminder_rules",
+            "revision",
+            "expected_revision",
+            "REVISION_CONFLICT",
+        ]:
             if required not in text:
                 violations.append(
                     f"{path.relative_to(ROOT)} missing unified term: {required}"
                 )
+
+    api_spec_text = reference_texts[API_SPEC_PATH]
+    if api_spec_text.count("expected_revision?: integer") != 2:
+        violations.append(
+            "mcp-tool-spec.md must declare expected_revision on exactly two update tools"
+        )
+    if "A stale value returns `REVISION_CONFLICT`" not in api_spec_text:
+        violations.append("mcp-tool-spec.md must document a stale revision conflict")
+    if "imem_update_entry(entry_id=...) with" in skill_text:
+        violations.append("SKILL.md still documents update without expected_revision")
+    for required in [
+        "Never automatically retry `REVISION_CONFLICT`",
+        "never omit\n`expected_revision` to force an overwrite",
+    ]:
+        if required not in skill_text:
+            violations.append(f"SKILL.md missing revision safety rule: {required}")
 
     openai_text = OPENAI_PATH.read_text(encoding="utf-8")
     for required in ["$imem-skill", "Entry", contract["production_url"]]:

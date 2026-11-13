@@ -21,6 +21,7 @@ normal Agent requests.
 ```json
 {
   "id": "MEM-20261101-001",
+  "revision": 1,
   "kind": "schedule",
   "title": "Product review",
   "content": "Review the launch scope",
@@ -42,16 +43,17 @@ normal Agent requests.
     "notes": "",
     "recurrence": null,
     "timezone": "Asia/Shanghai",
-    "next_occurrence_at": "2026-11-05T02:00:00Z",
-    "revision": 1
+    "next_occurrence_at": "2026-11-05T02:00:00Z"
   },
   "reminder_rules": []
 }
 ```
 
 `schedule_details` is `null` and `reminder_rules` is empty for a note Entry.
-Reminder Rules are nested under Schedule Entries. Occurrences expose
-`entry_id` and `occurrence_id`, never legacy identity as the canonical key.
+Every Entry has a top-level integer `revision`. Every nested Reminder Rule also
+has its own integer `revision`. Reminder Rules are nested under Schedule Entries.
+Occurrences expose `entry_id` and `occurrence_id`, never legacy identity as the
+canonical key.
 
 ## Canonical Production Tools
 
@@ -147,10 +149,14 @@ Canonical input:
 entry_id: string
 patch: object
 request_id: string
+expected_revision?: integer
 ```
 
-Do not set `id` or `kind`. Nest Schedule changes under
-`patch.schedule_details`. Return `data.entry`.
+Do not set `id`, `kind`, or `revision`. Nest Schedule changes under
+`patch.schedule_details`. Canonical Skill callers must read `data.entry.revision`
+first and pass it as `expected_revision`; the parameter is optional only for
+legacy client compatibility. Return `data.entry` with its incremented revision.
+A stale value returns `REVISION_CONFLICT` without applying the patch.
 
 During migration, the tool also accepts this mutually exclusive legacy form:
 
@@ -210,9 +216,13 @@ entry_id: string
 rule_id: string
 patch: object
 request_id: string
+expected_revision?: integer
 ```
 
-Return the updated `data.entry`.
+Canonical Skill callers must read the selected nested Reminder Rule's `revision`
+and pass it as `expected_revision`; omission remains only for legacy client
+compatibility. Return the updated `data.entry`, including the incremented rule
+revision. A stale value returns `REVISION_CONFLICT` without applying the patch.
 
 ### `imem_delete_entry_reminder_rule`
 
@@ -274,6 +284,18 @@ key only for an identical retry. Different arguments with the same key return
 After an uncertain update or delete, read current state before retrying. Ask
 the user to choose when a list returns multiple plausible targets.
 
+## Optimistic Concurrency
+
+Before `imem_update_entry`, get the Entry and send its top-level `revision` as
+`expected_revision`. Before `imem_update_entry_reminder_rule`, get the owning
+Schedule Entry, select the rule, and send that rule's `revision`. The update
+returns the resource with an incremented revision.
+
+If either update returns `REVISION_CONFLICT`, do not retry automatically and do
+not omit `expected_revision` to force a write. Re-read current state, explain
+that another client changed the resource, and ask the user whether to retry the
+intended patch against the latest revision or merge the competing changes.
+
 ## Migration Aliases
 
 Production temporarily retains:
@@ -300,4 +322,5 @@ deprecation and telemetry review.
 | `VALIDATION_FAILED` | Correct clear fields or ask for missing information. |
 | `INVALID_ENTRY_KIND` | Use `note` or `schedule`. |
 | `IDEMPOTENCY_CONFLICT` | Do not retry with that key; confirm intent. |
+| `REVISION_CONFLICT` | Re-read current state, explain the concurrent change, and ask whether to retry or merge. Never force overwrite. |
 | `MCP_TOOL_ERROR` | Treat the outcome as failed or uncertain. |

@@ -125,14 +125,19 @@ iMem remote MCP server.
 2. Let authentication determine the workspace; never pass `workspace_id`.
 3. Include `request_id` on mutations.
 4. Include `idempotency_key` on Entry, Reminder Rule, and Artifact creates.
-5. List or get Entries before mutation unless the exact `entry_id` is already
-   confirmed.
-6. Ask the user to choose when multiple Entries plausibly match.
-7. Never guess `entry_id` or `rule_id`.
-8. Keep `kind` immutable. Put schedule changes under `schedule_details`.
-9. Manage reminders only through a Schedule Entry's nested reminder-rule tools.
-10. Preserve MCP error codes and never present a failed write as successful.
-11. Keep Artifact uploads private. Only the user can enable a Public Link.
+5. List Entries to select a target when `entry_id` is unknown. Before every
+   Entry update, get that Entry and capture its latest top-level `revision`,
+   even when `entry_id` is already confirmed.
+6. Before every Reminder Rule update, get the owning Schedule Entry, select the
+   rule, and capture that rule's latest `revision`.
+7. Pass the captured value as `expected_revision` to canonical Entry and
+   Reminder Rule update tools.
+8. Ask the user to choose when multiple Entries plausibly match.
+9. Never guess `entry_id`, `rule_id`, or a revision.
+10. Keep `kind` immutable. Put schedule changes under `schedule_details`.
+11. Manage reminders only through a Schedule Entry's nested reminder-rule tools.
+12. Preserve MCP error codes and never present a failed write as successful.
+13. Keep Artifact uploads private. Only the user can enable a Public Link.
 
 ## Use Minimal Workflows
 
@@ -146,8 +151,9 @@ health -> time context if relative -> imem_create_entry(kind=schedule)
 find content
 health -> imem_list_entries -> imem_get_entry when details are needed
 
-update
-health -> list/get unless ID confirmed -> imem_update_entry(entry_id=...)
+update Entry
+health -> list if ID unknown -> get Entry -> capture Entry revision
+-> imem_update_entry(entry_id=..., expected_revision=revision)
 
 delete or cancel
 health -> list/get unless ID confirmed -> imem_delete_entry(entry_id=...)
@@ -155,8 +161,12 @@ health -> list/get unless ID confirmed -> imem_delete_entry(entry_id=...)
 calendar or Today range
 health -> time context if relative -> imem_list_entry_occurrences
 
-add, update, or delete a reminder rule
-health -> get Schedule Entry -> nested reminder-rule tool
+add or delete a reminder rule
+health -> get Schedule Entry -> nested create/delete reminder-rule tool
+
+update a reminder rule
+health -> get Schedule Entry -> select rule -> capture rule revision
+-> imem_update_entry_reminder_rule(expected_revision=revision)
 
 upload a deliverable
 health -> imem_upload_artifact
@@ -177,8 +187,14 @@ ENTRY_NOT_FOUND       -> list again or ask the user to identify the target
 VALIDATION_FAILED     -> fix clear fields or ask for missing information
 INVALID_ENTRY_KIND    -> use note or schedule
 IDEMPOTENCY_CONFLICT  -> do not retry that key; confirm intent
+REVISION_CONFLICT     -> re-read, explain the concurrent change, and ask
+                         whether to retry with the latest revision or merge
 MCP_TOOL_ERROR        -> treat the outcome as failed or uncertain
 ```
+
+Never automatically retry `REVISION_CONFLICT` and never omit
+`expected_revision` to force an overwrite. Re-read the Entry, show the user
+what changed, and wait for an explicit retry or merge decision.
 
 ## Respect Boundaries
 
