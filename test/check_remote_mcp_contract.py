@@ -43,6 +43,13 @@ FORBIDDEN_USER_MCP_TOOLS = {
     "imem_get_operations",
 }
 
+LEGACY_SECTION_MARKERS = {
+    SKILL_PATH: "The following tools are migration aliases only",
+    AGENT_CONTRACT_PATH: "## Compatibility",
+    API_SPEC_PATH: "## Migration Aliases",
+    PRODUCT_LANGUAGE_PATH: "## Compatibility Language",
+}
+
 
 def main() -> int:
     violations: list[str] = []
@@ -100,6 +107,22 @@ def main() -> int:
     ]:
         if forbidden in skill_text:
             violations.append(f"SKILL.md still prefers legacy workflow: {forbidden}")
+
+    for path, marker in LEGACY_SECTION_MARKERS.items():
+        text = path.read_text(encoding="utf-8")
+        marker_index = text.find(marker)
+        if marker_index < 0:
+            violations.append(
+                f"{path.relative_to(ROOT)} missing explicit compatibility marker: {marker}"
+            )
+            continue
+        for alias in EXPECTED_LEGACY_ALIASES:
+            alias_index = text.find(alias)
+            if alias_index >= 0 and alias_index < marker_index:
+                violations.append(
+                    f"{path.relative_to(ROOT)} uses legacy alias before compatibility "
+                    f"section: {alias}"
+                )
 
     reference_texts = {
         AGENT_CONTRACT_PATH: AGENT_CONTRACT_PATH.read_text(encoding="utf-8"),

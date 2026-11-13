@@ -25,6 +25,7 @@ REQUIRED_FILES = [
     PLUGIN_DIR / ".claude-mcp.json",
     PLUGIN_DIR / "skills" / "imem-skill" / "SKILL.md",
     ROOT / ".github" / "workflows" / "validate.yml",
+    ROOT / "contracts" / "package-sources.json",
     ROOT / "contracts" / "remote-mcp.json",
     SKILL_DIR / "SKILL.md",
     SKILL_DIR / "agents" / "openai.yaml",
