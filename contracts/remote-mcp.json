@@ -43,5 +43,15 @@
     "imem_create_schedule",
     "imem_create_reminder",
     "imem_cancel_entry"
-  ]
+  ],
+  "optimistic_concurrency": {
+    "revision_field": "revision",
+    "expected_revision_parameter": "expected_revision",
+    "canonical_update_tools": [
+      "imem_update_entry",
+      "imem_update_entry_reminder_rule"
+    ],
+    "conflict_error": "REVISION_CONFLICT",
+    "skill_requires_expected_revision": true
+  }
 }
