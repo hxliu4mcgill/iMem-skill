@@ -42,13 +42,17 @@ memory_service.operations
    `server_time` and `workspace_timezone` for each operation.
 3. Include `request_id` on mutations.
 4. Include `idempotency_key` on Entry, Reminder Rule, and Artifact creates.
-5. List or get an Entry before mutation unless its exact `entry_id` is already
-   confirmed.
-6. Ask the user to choose when multiple plausible Entries match.
-7. Never guess `entry_id` or `rule_id`.
-8. Keep Entry `kind` immutable and nest Schedule changes under
-   `schedule_details`.
-9. Preserve service error codes and never report a failed write as successful.
+5. List Entries to select a target when `entry_id` is unknown. Before every
+   Entry update, read that Entry and capture its top-level `revision`, even if
+   the ID is already confirmed.
+6. Before every Reminder Rule update, read the owning Schedule Entry and
+   capture the selected rule's `revision`.
+7. Send the captured revision as `expected_revision` on canonical update calls.
+8. Ask the user to choose when multiple plausible Entries match.
+9. Never guess `entry_id`, `rule_id`, or a revision.
+10. Keep Entry `kind` immutable and nest Schedule changes under
+    `schedule_details`.
+11. Preserve service error codes and never report a failed write as successful.
 
 ## Intent Routing
 
@@ -108,8 +112,10 @@ update or delete, read current state before retrying.
 
 ## Update And Delete
 
-Use `imem_update_entry(entry_id=...)` with common fields at the top level and
-Schedule fields inside `patch.schedule_details`. Never patch `id` or `kind`.
+Use `imem_update_entry(entry_id=..., expected_revision=...)` with common
+fields at the top level and Schedule fields inside `patch.schedule_details`.
+Never patch `id`, `kind`, or `revision`. Read the latest Entry immediately
+before the update and copy its top-level `revision` into `expected_revision`.
 
 Use `imem_delete_entry` for soft deletion. A note becomes deleted. A Schedule
 Entry becomes canceled/deleted together with its active Reminder Rules
@@ -117,7 +123,15 @@ according to service policy. Do not physically delete storage rows or files.
 
 Manage Reminder Rules through the nested create, update, and delete tools. A
 Reminder Rule mutation requires both the owning Schedule `entry_id` and the
-rule's `rule_id` where applicable.
+rule's `rule_id` where applicable. Before `imem_update_entry_reminder_rule`,
+read the Schedule Entry, select the nested rule, and send that rule's `revision`
+as `expected_revision`.
+
+The service keeps `expected_revision` optional for older clients, but canonical
+Skill update paths must always send it. On `REVISION_CONFLICT`, re-read the
+Entry and explain that another client changed it. Never silently retry without
+user review, omit `expected_revision`, or force an overwrite. Retry with the
+new revision only after the user chooses to apply or merge the intended change.
 
 ## Artifact Upload
 
@@ -152,5 +166,6 @@ it.
 | `VALIDATION_FAILED` | Fix clear fields or ask for missing information. |
 | `INVALID_ENTRY_KIND` | Use `note` or `schedule`. |
 | `IDEMPOTENCY_CONFLICT` | Do not retry the same key; confirm intent. |
+| `REVISION_CONFLICT` | Re-read current state, explain the concurrent change, and ask whether to retry or merge. Never force overwrite. |
 | `CONFIGURATION_ERROR` | Check the MCP URL and host configuration. |
 | `MCP_TOOL_ERROR` | Treat the outcome as failed or uncertain. |

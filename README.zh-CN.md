@@ -244,7 +244,7 @@ codex mcp add imem --url https://imem.xin/mcp --bearer-token-env-var IMEM_API_KE
 ## 兼容性
 
 ```text
-Skill 版本：v0.2.0
+Skill 版本：v0.3.0
 Skill 名称：imem-skill
 生产 MCP：https://imem.xin/mcp
 生产 MCP 合同：2026-11-02
@@ -266,6 +266,16 @@ Agent -> 远程 MCP -> 已部署的 iMem 服务
 ```
 
 Skill 不得直接读写 SQLite、JSONL 用户数据、服务器数据目录或服务实现模块。
+
+## 正式打包源
+
+本仓库是唯一正式打包源。唯一可编辑的 Skill 位于 skills/imem-skill/；
+plugins/imem/skills/imem-skill/ 是生成的镜像，plugins/imem/ 是唯一的 Plugin
+包根目录。名为 red-skill 的历史目录或归档包均属于已排除的旧副本，
+Marketplace manifest、同步脚本、CI workflow 和发布任务都不得选择它们。
+
+机器可读的边界声明位于 contracts/package-sources.json。CI 会验证该声明、
+Skill 镜像内容、所有打包入口，以及仓库中不存在预构建 ZIP 归档。
 
 ## 验证
 

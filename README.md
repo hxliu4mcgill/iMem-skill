@@ -263,7 +263,7 @@ A planned or protocol-compatible platform is not an installable promise.
 ## Compatibility
 
 ```text
-Skill release: v0.2.0
+Skill release: v0.3.0
 Skill name: imem-skill
 Production MCP: https://imem.xin/mcp
 Production MCP contract: 2026-11-02
@@ -286,6 +286,19 @@ Agent -> remote MCP -> deployed iMem service
 
 The Skill must not directly read or write SQLite, JSONL user data, server data
 directories, or service implementation modules.
+
+## Package source of truth
+
+This repository is the only official packaging source. The editable Skill lives
+at `skills/imem-skill/`; `plugins/imem/skills/imem-skill/` is a generated mirror,
+and `plugins/imem/` is the only Plugin package root. Historical folders or
+archives named `red-skill` are excluded legacy copies and must never be selected
+by a marketplace manifest, synchronization script, CI workflow, or release job.
+
+The machine-readable boundary is
+[`contracts/package-sources.json`](contracts/package-sources.json). CI validates
+the declaration, exact Skill mirror contents, package selectors, and absence of
+prebuilt ZIP archives.
 
 ## Validation
 

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "repository_role": "only-official-package-source",
+  "canonical_skill": "skills/imem-skill",
+  "generated_skill_mirrors": [
+    "plugins/imem/skills/imem-skill"
+  ],
+  "plugin_package_roots": [
+    "plugins/imem"
+  ],
+  "excluded_legacy_copy_names": [
+    "red-skill"
+  ]
+}
