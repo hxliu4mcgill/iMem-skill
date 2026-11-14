@@ -263,7 +263,7 @@ A planned or protocol-compatible platform is not an installable promise.
 ## Compatibility
 
 ```text
-Skill release: v0.2.0
+Skill release: v0.3.0
 Skill name: imem-skill
 Production MCP: https://imem.xin/mcp
 Production MCP contract: 2026-11-02

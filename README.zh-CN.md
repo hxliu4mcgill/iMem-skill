@@ -244,7 +244,7 @@ codex mcp add imem --url https://imem.xin/mcp --bearer-token-env-var IMEM_API_KE
 ## 兼容性
 
 ```text
-Skill 版本：v0.2.0
+Skill 版本：v0.3.0
 Skill 名称：imem-skill
 生产 MCP：https://imem.xin/mcp
 生产 MCP 合同：2026-11-02
