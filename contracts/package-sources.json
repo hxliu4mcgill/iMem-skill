@@ -3,10 +3,12 @@
   "repository_role": "only-official-package-source",
   "canonical_skill": "skills/imem-skill",
   "generated_skill_mirrors": [
-    "plugins/imem/skills/imem-skill"
+    "plugins/imem/skills/imem-skill",
+    "integrations/deepseek-harness/skills/imem-skill"
   ],
   "plugin_package_roots": [
-    "plugins/imem"
+    "plugins/imem",
+    "integrations/deepseek-harness"
   ],
   "excluded_legacy_copy_names": [
     "red-skill"

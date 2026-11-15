@@ -27,6 +27,10 @@ REQUIRED_FILES = [
     ROOT / ".github" / "workflows" / "validate.yml",
     ROOT / "contracts" / "package-sources.json",
     ROOT / "contracts" / "remote-mcp.json",
+    ROOT / "integrations" / "deepseek-harness" / "package.json",
+    ROOT / "integrations" / "deepseek-harness" / "cordis.patch.yml",
+    ROOT / "integrations" / "deepseek-harness" / "README.md",
+    ROOT / "integrations" / "deepseek-harness" / "skills" / "imem-skill" / "SKILL.md",
     SKILL_DIR / "SKILL.md",
     SKILL_DIR / "agents" / "openai.yaml",
     SKILL_DIR / "references" / "agent-contract.md",
@@ -92,6 +96,8 @@ def main() -> int:
             "claude code",
             "workbuddy",
             "hermes",
+            "deepseek harness",
+            "dsh-plugin-imem",
             "agent platform support",
             "https://imem.xin/mcp",
             "bearer_token_env_var",
@@ -121,6 +127,7 @@ def main() -> int:
             "check_package_boundary.py",
             "check_plugin_package.py",
             "check_remote_mcp_contract.py",
+            "check_deepseek_harness_package.py",
             "py_compile",
         ]:
             if required not in text:

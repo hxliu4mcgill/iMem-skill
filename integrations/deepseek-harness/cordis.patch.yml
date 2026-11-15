@@ -1,0 +1,18 @@
+- insert:
+    - id: imem-mcp
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: imem
+        transport: streamable-http
+        url: https://imem.xin/mcp
+        headers:
+          Authorization: 'Bearer ${credential:IMEM_API_KEY}'
+        expandTemplates: true
+        startupTimeoutMs: 30000
+    - id: imem-skill-filesystem
+      name: '@deepseek-ai/dsh-skill-filesystem'
+      config:
+        providerName: imem-plugin
+        includeDefaultRoots: false
+        watch: false
+        bundledSkillDir: !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('dsh-plugin-imem/package.json')), 'skills')

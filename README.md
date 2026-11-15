@@ -11,6 +11,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-d97757?style=flat-square)](#agent-platform-support)
 [![WorkBuddy](https://img.shields.io/badge/WorkBuddy-plugin-2563eb?style=flat-square)](#agent-platform-support)
 [![Hermes](https://img.shields.io/badge/Hermes-skill-9333ea?style=flat-square)](#agent-platform-support)
+[![DeepSeek Harness](https://img.shields.io/badge/DeepSeek_Harness-plugin-4b5563?style=flat-square)](#agent-platform-support)
 [![MCP](https://img.shields.io/badge/MCP-remote-7c3aed?style=flat-square)](#how-it-works)
 [![License](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](LICENSE)
 
@@ -34,7 +35,7 @@ one stable Entry ID, while you control which integrations can access them.
 > [!IMPORTANT]
 > `iMem-skill` is an independent, unofficial, and experimental project. It is
 > not affiliated with or endorsed by OpenAI, Codex, Anthropic, Claude Code,
-> WorkBuddy, CodeBuddy, Nous Research, or Hermes Agent. It is distributed from
+> WorkBuddy, CodeBuddy, Nous Research, Hermes Agent, or DeepSeek AI. It is distributed from
 > this repository through custom Marketplaces and direct Skill installation,
 > not through a vendor-curated public directory.
 
@@ -212,6 +213,22 @@ hermes mcp test imem
 This adds iMem as an Agent Skill and remote MCP integration. It does not replace
 Hermes' built-in memory provider.
 
+### 2E. Install the DeepSeek Harness Plugin
+
+Make the Personal API Key available to the DeepSeek Harness process, then install
+the DSH bundle:
+
+```powershell
+$env:IMEM_API_KEY = "your-api-key"
+dsh plugin --profile web add dsh-plugin-imem
+dsh web
+```
+
+The bundle installs the canonical iMem Skill and registers the authenticated
+Streamable HTTP MCP connection together. The key is resolved through the DSH
+credential provider and is not stored in the package. Source and package details
+are under [`integrations/deepseek-harness/`](integrations/deepseek-harness/).
+
 ### Direct MCP alternative
 
 If you only want the tools and do not want the bundled Skill, connect the MCP
@@ -255,6 +272,7 @@ No local Python process or stdio MCP adapter is required.
 | Claude Code | GitHub Marketplace Plugin packaged; live install validation pending |
 | WorkBuddy / CodeBuddy | Compatible GitHub Marketplace Plugin packaged; live install validation pending |
 | Hermes Agent | Direct Skill and remote MCP installation documented; live install validation pending |
+| DeepSeek Harness | Native DSH bundle packaged and validated in an isolated DSH profile |
 | Other Streamable HTTP MCP hosts | Protocol-compatible; not yet validated |
 | OpenCode, Cursor | Planned validation |
 
@@ -290,8 +308,9 @@ directories, or service implementation modules.
 ## Package source of truth
 
 This repository is the only official packaging source. The editable Skill lives
-at `skills/imem-skill/`; `plugins/imem/skills/imem-skill/` is a generated mirror,
-and `plugins/imem/` is the only Plugin package root. Historical folders or
+at `skills/imem-skill/`; `plugins/imem/skills/imem-skill/` and
+`integrations/deepseek-harness/skills/imem-skill/` are generated mirrors. The
+package roots are `plugins/imem/` and `integrations/deepseek-harness/`. Historical folders or
 archives named `red-skill` are excluded legacy copies and must never be selected
 by a marketplace manifest, synchronization script, CI workflow, or release job.
 
@@ -313,6 +332,10 @@ python test/check_standalone_repository.py
 python test/check_package_boundary.py
 python test/check_remote_mcp_contract.py
 python test/check_plugin_package.py
+python test/check_deepseek_harness_package.py
+
+cd integrations/deepseek-harness
+npm pack --dry-run
 ```
 
 ## Upgrade
@@ -345,6 +368,12 @@ hermes skills update
 hermes mcp test imem
 ```
 
+DeepSeek Harness:
+
+```bash
+dsh plugin --profile web update dsh-plugin-imem
+```
+
 Start a new task or session after upgrading.
 
 ## Uninstall
@@ -375,6 +404,12 @@ hermes skills uninstall imem-skill
 hermes mcp remove imem
 ```
 
+For DeepSeek Harness:
+
+```bash
+dsh plugin --profile web remove dsh-plugin-imem
+```
+
 Removing the Marketplace is optional if you want to reinstall later. Revoke
 the integration's API Key in the Web App when it is no longer needed.
 
@@ -389,6 +424,8 @@ the integration's API Key in the Web App when it is no longer needed.
   validation is pending on a machine with Claude Code.
 - WorkBuddy / CodeBuddy Marketplace entries and the Hermes installation path
   are implemented; live installation validation is pending.
+- The native DeepSeek Harness bundle is packaged, statically validated, and
+  installed successfully in an isolated DSH profile.
 
 ## Security
 

@@ -1,4 +1,4 @@
-"""Synchronize the canonical Skill into the distributable Agent Plugin."""
+"""Synchronize the canonical Skill into distributable Agent packages."""
 
 from __future__ import annotations
 
@@ -10,7 +10,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "skills" / "imem-skill"
-DESTINATION = ROOT / "plugins" / "imem" / "skills" / "imem-skill"
+DESTINATIONS = [
+    ROOT / "plugins" / "imem" / "skills" / "imem-skill",
+    ROOT / "integrations" / "deepseek-harness" / "skills" / "imem-skill",
+]
 
 
 def _files(root: Path) -> set[Path]:
@@ -21,32 +24,37 @@ def _files(root: Path) -> set[Path]:
     }
 
 
-def is_synchronized() -> bool:
-    if not DESTINATION.is_dir():
+def _is_synchronized(destination: Path) -> bool:
+    if not destination.is_dir():
         return False
     source_files = _files(SOURCE)
-    destination_files = _files(DESTINATION)
+    destination_files = _files(destination)
     if source_files != destination_files:
         return False
     return all(
         filecmp.cmp(
             SOURCE / relative,
-            DESTINATION / relative,
+            destination / relative,
             shallow=False,
         )
         for relative in source_files
     )
 
 
+def is_synchronized() -> bool:
+    return all(_is_synchronized(destination) for destination in DESTINATIONS)
+
+
 def synchronize() -> None:
-    if DESTINATION.exists():
-        shutil.rmtree(DESTINATION)
-    DESTINATION.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(
-        SOURCE,
-        DESTINATION,
-        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
-    )
+    for destination in DESTINATIONS:
+        if destination.exists():
+            shutil.rmtree(destination)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(
+            SOURCE,
+            destination,
+            ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+        )
 
 
 def main() -> int:
@@ -54,25 +62,28 @@ def main() -> int:
     parser.add_argument(
         "--check",
         action="store_true",
-        help="fail if the Plugin mirror differs from the canonical Skill",
+        help="fail if a packaged Skill mirror differs from the canonical Skill",
     )
     args = parser.parse_args()
 
     if args.check:
         if not is_synchronized():
             print(
-                "Plugin Skill mirror is stale; run "
+                "Packaged Skill mirror is stale; run "
                 "`python tools/sync_plugin_skill.py`."
             )
             return 1
-        print("Plugin Skill mirror is synchronized")
+        print("Packaged Skill mirrors are synchronized")
         return 0
 
     synchronize()
     print(
         "Synchronized "
         f"{SOURCE.relative_to(ROOT).as_posix()} -> "
-        f"{DESTINATION.relative_to(ROOT).as_posix()}"
+        + ", ".join(
+            destination.relative_to(ROOT).as_posix()
+            for destination in DESTINATIONS
+        )
     )
     return 0
 

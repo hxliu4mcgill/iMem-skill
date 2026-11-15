@@ -11,6 +11,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-d97757?style=flat-square)](#agent-平台支持)
 [![WorkBuddy](https://img.shields.io/badge/WorkBuddy-plugin-2563eb?style=flat-square)](#agent-平台支持)
 [![Hermes](https://img.shields.io/badge/Hermes-skill-9333ea?style=flat-square)](#agent-平台支持)
+[![DeepSeek Harness](https://img.shields.io/badge/DeepSeek_Harness-plugin-4b5563?style=flat-square)](#agent-平台支持)
 [![MCP](https://img.shields.io/badge/MCP-remote-7c3aed?style=flat-square)](#工作原理)
 [![License](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](LICENSE)
 
@@ -32,7 +33,7 @@ iMem 让持久笔记与日程 Entry 跨越单次对话或单一 AI 持续发挥�
 
 > [!IMPORTANT]
 > `iMem-skill` 是一个独立、非官方且处于实验阶段的项目，与 OpenAI、Codex、
-> Anthropic、Claude Code、WorkBuddy、CodeBuddy、Nous Research 或 Hermes Agent
+> Anthropic、Claude Code、WorkBuddy、CodeBuddy、Nous Research、Hermes Agent 或 DeepSeek AI
 > 均不存在隶属、认可或官方合作关系。它通过本仓库提供的自定义 Marketplace 和
 > Skill 直装方式分发，并未进入厂商精选公共目录。
 
@@ -196,6 +197,20 @@ hermes mcp test imem
 这会把 iMem 添加为 Agent Skill 和远程 MCP 集成，不会取代 Hermes 内置的 Memory
 Provider。
 
+### 2E. 安装 DeepSeek Harness Plugin
+
+先让 DeepSeek Harness 进程能够读取 Personal API Key，再安装 DSH bundle：
+
+```powershell
+$env:IMEM_API_KEY = "your-api-key"
+dsh plugin --profile web add dsh-plugin-imem
+dsh web
+```
+
+这个 bundle 会同时安装 canonical iMem Skill，并注册需要认证的 Streamable HTTP MCP
+连接。密钥由 DSH credential provider 解析，不会存入安装包。源码和包配置位于
+[`integrations/deepseek-harness/`](integrations/deepseek-harness/)。
+
 ### 仅连接 MCP
 
 如果只需要工具、不需要 Plugin 附带的 Skill，可以直接连接 MCP：
@@ -236,6 +251,7 @@ codex mcp add imem --url https://imem.xin/mcp --bearer-token-env-var IMEM_API_KE
 | Claude Code | 已完成 GitHub Marketplace Plugin 打包；待实机安装验证 |
 | WorkBuddy / CodeBuddy | 已完成兼容的 GitHub Marketplace Plugin 打包；待实机安装验证 |
 | Hermes Agent | 已提供 Skill 直装与远程 MCP 安装说明；待实机安装验证 |
+| DeepSeek Harness | 已完成原生 DSH bundle 打包和隔离 profile 安装验证 |
 | 其他 Streamable HTTP MCP 宿主 | 协议兼容，尚未验证 |
 | OpenCode、Cursor | 计划验证 |
 
@@ -270,8 +286,9 @@ Skill 不得直接读写 SQLite、JSONL 用户数据、服务器数据目录或�
 ## 正式打包源
 
 本仓库是唯一正式打包源。唯一可编辑的 Skill 位于 skills/imem-skill/；
-plugins/imem/skills/imem-skill/ 是生成的镜像，plugins/imem/ 是唯一的 Plugin
-包根目录。名为 red-skill 的历史目录或归档包均属于已排除的旧副本，
+plugins/imem/skills/imem-skill/ 和 integrations/deepseek-harness/skills/imem-skill/
+是生成的镜像。包根目录为 plugins/imem/ 和 integrations/deepseek-harness/。
+名为 red-skill 的历史目录或归档包均属于已排除的旧副本，
 Marketplace manifest、同步脚本、CI workflow 和发布任务都不得选择它们。
 
 机器可读的边界声明位于 contracts/package-sources.json。CI 会验证该声明、
@@ -290,6 +307,10 @@ python test/check_standalone_repository.py
 python test/check_package_boundary.py
 python test/check_remote_mcp_contract.py
 python test/check_plugin_package.py
+python test/check_deepseek_harness_package.py
+
+cd integrations/deepseek-harness
+npm pack --dry-run
 ```
 
 ## 升级
@@ -322,6 +343,12 @@ hermes skills update
 hermes mcp test imem
 ```
 
+DeepSeek Harness：
+
+```bash
+dsh plugin --profile web update dsh-plugin-imem
+```
+
 升级后新建任务或会话。
 
 ## 卸载
@@ -352,6 +379,12 @@ hermes skills uninstall imem-skill
 hermes mcp remove imem
 ```
 
+DeepSeek Harness：
+
+```bash
+dsh plugin --profile web remove dsh-plugin-imem
+```
+
 如果希望以后重新安装，可以保留 iMem Marketplace。不再使用该集成时，在 Web App 中
 撤销对应的 API Key。
 
@@ -364,6 +397,7 @@ hermes mcp remove imem
 - Codex 是当前经过线上实机验证的 Agent 路径。
 - Claude Code 已完成安装包和静态契约实现；仍需在安装了 Claude Code 的环境中实机验证。
 - WorkBuddy / CodeBuddy Marketplace 入口和 Hermes 安装路径已实现；仍待实机安装验证。
+- DeepSeek Harness 原生 bundle 已完成打包、静态校验和隔离 profile 安装验证。
 
 ## 安全
 
