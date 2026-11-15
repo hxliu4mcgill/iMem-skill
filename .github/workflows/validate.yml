@@ -32,6 +32,13 @@ jobs:
       - name: Validate Plugin package
         run: python test/check_plugin_package.py
 
+      - name: Validate DeepSeek Harness package
+        run: python test/check_deepseek_harness_package.py
+
+      - name: Inspect DeepSeek Harness npm package
+        working-directory: plugins/imem-dsh
+        run: npm pack --dry-run
+
       - name: Check Plugin Skill mirror
         run: python tools/sync_plugin_skill.py --check
 
@@ -39,6 +46,7 @@ jobs:
         run: |
           python -m py_compile \
             test/check_package_boundary.py \
+            test/check_deepseek_harness_package.py \
             test/check_plugin_package.py \
             test/check_publication_layout.py \
             test/check_remote_mcp_contract.py \
