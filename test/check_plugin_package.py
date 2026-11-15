@@ -30,11 +30,11 @@ EXPECTED_PACKAGE_SOURCES = {
     "canonical_skill": "skills/imem-skill",
     "generated_skill_mirrors": [
         "plugins/imem/skills/imem-skill",
-        "integrations/deepseek-harness/skills/imem-skill",
+        "plugins/imem-dsh/skills/imem-skill",
     ],
     "plugin_package_roots": [
         "plugins/imem",
-        "integrations/deepseek-harness",
+        "plugins/imem-dsh",
     ],
     "excluded_legacy_copy_names": ["red-skill"],
 }
@@ -88,8 +88,8 @@ def main() -> int:
         WORKBUDDY_MARKETPLACE_PATH,
         ROOT / ".github" / "workflows" / "validate.yml",
         SYNC_TOOL_PATH,
-        ROOT / "integrations" / "deepseek-harness" / "package.json",
-        ROOT / "integrations" / "deepseek-harness" / "cordis.patch.yml",
+        ROOT / "plugins" / "imem-dsh" / "package.json",
+        ROOT / "plugins" / "imem-dsh" / "cordis.patch.yml",
     ]
     for excluded_name in excluded_names:
         if (ROOT / excluded_name).exists():

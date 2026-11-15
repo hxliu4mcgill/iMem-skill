@@ -36,7 +36,7 @@ jobs:
         run: python test/check_deepseek_harness_package.py
 
       - name: Inspect DeepSeek Harness npm package
-        working-directory: integrations/deepseek-harness
+        working-directory: plugins/imem-dsh
         run: npm pack --dry-run
 
       - name: Check Plugin Skill mirror

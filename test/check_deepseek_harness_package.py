@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_ROOT = ROOT / "integrations" / "deepseek-harness"
+PACKAGE_ROOT = ROOT / "plugins" / "imem-dsh"
 PACKAGE_PATH = PACKAGE_ROOT / "package.json"
 PATCH_PATH = PACKAGE_ROOT / "cordis.patch.yml"
 CANONICAL_SKILL = ROOT / "skills" / "imem-skill"

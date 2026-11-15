@@ -209,7 +209,7 @@ dsh web
 
 这个 bundle 会同时安装 canonical iMem Skill，并注册需要认证的 Streamable HTTP MCP
 连接。密钥由 DSH credential provider 解析，不会存入安装包。源码和包配置位于
-[`integrations/deepseek-harness/`](integrations/deepseek-harness/)。
+[`plugins/imem-dsh/`](plugins/imem-dsh/)。
 
 ### 仅连接 MCP
 
@@ -286,8 +286,8 @@ Skill 不得直接读写 SQLite、JSONL 用户数据、服务器数据目录或�
 ## 正式打包源
 
 本仓库是唯一正式打包源。唯一可编辑的 Skill 位于 skills/imem-skill/；
-plugins/imem/skills/imem-skill/ 和 integrations/deepseek-harness/skills/imem-skill/
-是生成的镜像。包根目录为 plugins/imem/ 和 integrations/deepseek-harness/。
+plugins/imem/skills/imem-skill/ 和 plugins/imem-dsh/skills/imem-skill/
+是生成的镜像。包根目录为 plugins/imem/ 和 plugins/imem-dsh/。
 名为 red-skill 的历史目录或归档包均属于已排除的旧副本，
 Marketplace manifest、同步脚本、CI workflow 和发布任务都不得选择它们。
 
@@ -309,7 +309,7 @@ python test/check_remote_mcp_contract.py
 python test/check_plugin_package.py
 python test/check_deepseek_harness_package.py
 
-cd integrations/deepseek-harness
+cd plugins/imem-dsh
 npm pack --dry-run
 ```
 

@@ -14,7 +14,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hxliu4mcgill/iMem-skill.git",
-    "directory": "integrations/deepseek-harness"
+    "directory": "plugins/imem-dsh"
   },
   "license": "MIT",
   "files": [

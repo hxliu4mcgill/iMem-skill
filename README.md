@@ -227,7 +227,7 @@ dsh web
 The bundle installs the canonical iMem Skill and registers the authenticated
 Streamable HTTP MCP connection together. The key is resolved through the DSH
 credential provider and is not stored in the package. Source and package details
-are under [`integrations/deepseek-harness/`](integrations/deepseek-harness/).
+are under [`plugins/imem-dsh/`](plugins/imem-dsh/).
 
 ### Direct MCP alternative
 
@@ -309,8 +309,8 @@ directories, or service implementation modules.
 
 This repository is the only official packaging source. The editable Skill lives
 at `skills/imem-skill/`; `plugins/imem/skills/imem-skill/` and
-`integrations/deepseek-harness/skills/imem-skill/` are generated mirrors. The
-package roots are `plugins/imem/` and `integrations/deepseek-harness/`. Historical folders or
+`plugins/imem-dsh/skills/imem-skill/` are generated mirrors. The
+package roots are `plugins/imem/` and `plugins/imem-dsh/`. Historical folders or
 archives named `red-skill` are excluded legacy copies and must never be selected
 by a marketplace manifest, synchronization script, CI workflow, or release job.
 
@@ -334,7 +334,7 @@ python test/check_remote_mcp_contract.py
 python test/check_plugin_package.py
 python test/check_deepseek_harness_package.py
 
-cd integrations/deepseek-harness
+cd plugins/imem-dsh
 npm pack --dry-run
 ```
 

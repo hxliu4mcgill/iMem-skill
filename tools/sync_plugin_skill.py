@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "skills" / "imem-skill"
 DESTINATIONS = [
     ROOT / "plugins" / "imem" / "skills" / "imem-skill",
-    ROOT / "integrations" / "deepseek-harness" / "skills" / "imem-skill",
+    ROOT / "plugins" / "imem-dsh" / "skills" / "imem-skill",
 ]
 
 
