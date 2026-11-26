@@ -1,6 +1,7 @@
 - insert:
     - id: imem-mcp
       name: '@deepseek-ai/dsh-mcp-client'
+      inject: ['credentials']
       config:
         serverName: imem
         transport: streamable-http

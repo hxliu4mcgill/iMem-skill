@@ -53,6 +53,7 @@ def main() -> int:
     required_patch_text = [
         "id: imem-mcp",
         "name: '@deepseek-ai/dsh-mcp-client'",
+        "inject: ['credentials']",
         "serverName: imem",
         "transport: streamable-http",
         "url: https://imem.xin/mcp",

@@ -199,7 +199,20 @@ Provider。
 
 ### 2E. 安装 DeepSeek Harness Plugin
 
-先让 DeepSeek Harness 进程能够读取 Personal API Key，再安装 DSH bundle：
+在 DeepSeek Harness Desktop 中：
+
+1. 打开**插件**，选择**添加插件**。
+2. 输入 `dsh-plugin-imem`，然后选择**安装**。
+3. Windows 用户新建或编辑 `%USERPROFILE%\.dsh\.env`；macOS 和 Linux 用户编辑
+   `~/.dsh/.env`，加入：
+
+   ```dotenv
+   IMEM_API_KEY=your-api-key
+   ```
+
+4. 完全退出并重新启动 DeepSeek Harness，然后新建会话。
+
+如果使用 CLI / Web profile：
 
 ```powershell
 $env:IMEM_API_KEY = "your-api-key"
@@ -208,7 +221,8 @@ dsh web
 ```
 
 这个 bundle 会同时安装 canonical iMem Skill，并注册需要认证的 Streamable HTTP MCP
-连接。密钥由 DSH credential provider 解析，不会存入安装包。源码和包配置位于
+连接。密钥由 DSH credential provider 解析，不会存入安装包。请勿提交 `.dsh/.env`，
+也不要向他人公开该文件。源码和包配置位于
 [`plugins/imem-dsh/`](plugins/imem-dsh/)。
 
 ### 仅连接 MCP
@@ -345,6 +359,8 @@ hermes mcp test imem
 
 DeepSeek Harness：
 
+Desktop 用户可在**插件**页面更新已安装的包。Web profile 用户运行：
+
 ```bash
 dsh plugin --profile web update dsh-plugin-imem
 ```
@@ -380,6 +396,8 @@ hermes mcp remove imem
 ```
 
 DeepSeek Harness：
+
+Desktop 用户可在**插件**页面移除已安装的包。Web profile 用户运行：
 
 ```bash
 dsh plugin --profile web remove dsh-plugin-imem

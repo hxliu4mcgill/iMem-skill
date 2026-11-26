@@ -215,8 +215,20 @@ Hermes' built-in memory provider.
 
 ### 2E. Install the DeepSeek Harness Plugin
 
-Make the Personal API Key available to the DeepSeek Harness process, then install
-the DSH bundle:
+In DeepSeek Harness Desktop:
+
+1. Open **Plugins** and choose **Add plugin**.
+2. Enter `dsh-plugin-imem` and choose **Install**.
+3. Create or edit `%USERPROFILE%\.dsh\.env` on Windows (or `~/.dsh/.env` on
+   macOS and Linux) and add:
+
+   ```dotenv
+   IMEM_API_KEY=your-api-key
+   ```
+
+4. Completely restart DeepSeek Harness and start a new session.
+
+For the CLI / Web profile:
 
 ```powershell
 $env:IMEM_API_KEY = "your-api-key"
@@ -226,8 +238,9 @@ dsh web
 
 The bundle installs the canonical iMem Skill and registers the authenticated
 Streamable HTTP MCP connection together. The key is resolved through the DSH
-credential provider and is not stored in the package. Source and package details
-are under [`plugins/imem-dsh/`](plugins/imem-dsh/).
+credential provider and is not stored in the package. Keep `.dsh/.env` private
+and never commit it. Source and package details are under
+[`plugins/imem-dsh/`](plugins/imem-dsh/).
 
 ### Direct MCP alternative
 
@@ -370,6 +383,9 @@ hermes mcp test imem
 
 DeepSeek Harness:
 
+In Desktop, update the installed package from the **Plugins** page. For the Web
+profile:
+
 ```bash
 dsh plugin --profile web update dsh-plugin-imem
 ```
@@ -405,6 +421,9 @@ hermes mcp remove imem
 ```
 
 For DeepSeek Harness:
+
+In Desktop, remove the installed package from the **Plugins** page. For the Web
+profile:
 
 ```bash
 dsh plugin --profile web remove dsh-plugin-imem

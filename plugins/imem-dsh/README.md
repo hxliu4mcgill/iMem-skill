@@ -14,9 +14,29 @@ iMem API Key or run an install script.
 
 ## Install
 
-Create a Personal API Key at <https://imem.xin/app/api-keys>. Make it available
-to the process that starts DeepSeek Harness as `IMEM_API_KEY`, then install the
-bundle into the profile you use:
+Create a Personal API Key at <https://imem.xin/app/api-keys>.
+
+### DeepSeek Harness Desktop
+
+1. Open **Plugins** and choose **Add plugin**.
+2. Enter `dsh-plugin-imem` and choose **Install**.
+3. Add this line to `%USERPROFILE%\.dsh\.env` on Windows or `~/.dsh/.env` on
+   macOS and Linux:
+
+   ```dotenv
+   IMEM_API_KEY=your-api-key
+   ```
+
+4. Completely restart DeepSeek Harness, then start a new session.
+
+The package name works in the Desktop installer after the package has been
+published to npm. During local development, the same dialog also accepts the
+absolute path to this `plugins/imem-dsh` directory.
+
+### CLI / Web profile
+
+Make the key available to the process that starts DeepSeek Harness, then install
+the bundle into the profile you use:
 
 ```powershell
 $env:IMEM_API_KEY = "your-api-key"
@@ -33,7 +53,8 @@ dsh web
 ```
 
 The secret is resolved through the DeepSeek Harness credential provider. It is
-not stored in this package or expanded into the raw plugin configuration.
+not stored in this package or expanded into the raw plugin configuration. Keep
+the `.env` file private and never commit it.
 
 ## What the bundle adds
 
@@ -50,6 +71,9 @@ Do not install a second MCP entry named `imem`; DeepSeek Harness rejects
 duplicate server names in the same scope.
 
 ## Upgrade and uninstall
+
+In Desktop, manage the installed package from the **Plugins** page. For the Web
+profile, use:
 
 ```bash
 dsh plugin --profile web update dsh-plugin-imem
