@@ -35,6 +35,9 @@ jobs:
       - name: Validate DeepSeek Harness package
         run: python test/check_deepseek_harness_package.py
 
+      - name: Validate DeepSeek Harness runtime modes
+        run: node test/check_deepseek_harness_runtime.mjs
+
       - name: Inspect DeepSeek Harness npm package
         working-directory: plugins/imem-dsh
         run: npm pack --dry-run

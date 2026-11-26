@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = ROOT / "plugins" / "imem-dsh"
 PACKAGE_PATH = PACKAGE_ROOT / "package.json"
 PATCH_PATH = PACKAGE_ROOT / "cordis.patch.yml"
+INDEX_PATH = PACKAGE_ROOT / "index.js"
 CANONICAL_SKILL = ROOT / "skills" / "imem-skill"
 PACKAGED_SKILL = PACKAGE_ROOT / "skills" / "imem-skill"
 
@@ -26,7 +27,7 @@ def _file_map(root: Path) -> dict[str, bytes]:
 def main() -> int:
     violations: list[str] = []
 
-    for path in (PACKAGE_PATH, PATCH_PATH, PACKAGE_ROOT / "README.md"):
+    for path in (PACKAGE_PATH, PATCH_PATH, INDEX_PATH, PACKAGE_ROOT / "README.md"):
         if not path.is_file():
             violations.append(f"missing DSH package file: {path.relative_to(ROOT)}")
 
@@ -46,19 +47,13 @@ def main() -> int:
         violations.append("DSH package must declare engines.dsh")
 
     files = set(package.get("files") or [])
-    if files != {"cordis.patch.yml", "README.md", "skills"}:
+    if files != {"index.js", "cordis.patch.yml", "README.md", "skills"}:
         violations.append("DSH package files allowlist is unexpected")
 
     patch = PATCH_PATH.read_text(encoding="utf-8")
     required_patch_text = [
-        "id: imem-mcp",
-        "name: '@deepseek-ai/dsh-mcp-client'",
-        "inject: ['credentials']",
-        "serverName: imem",
-        "transport: streamable-http",
-        "url: https://imem.xin/mcp",
-        "Authorization: 'Bearer ${credential:IMEM_API_KEY}'",
-        "expandTemplates: true",
+        "id: imem-connector",
+        "name: dsh-plugin-imem",
         "id: imem-skill-filesystem",
         "name: '@deepseek-ai/dsh-skill-filesystem'",
         "providerName: imem-plugin",
@@ -71,6 +66,21 @@ def main() -> int:
         if required not in patch:
             violations.append(f"cordis.patch.yml missing expected text: {required}")
 
+    index = INDEX_PATH.read_text(encoding="utf-8")
+    for required in [
+        "ctx.mcpManager.register",
+        "mcpAccounts.register",
+        "https://imem.xin/mcp",
+        "mcp-client/imem",
+        "entries:read entries:write",
+        "startAuthorization",
+        "IMEM_API_KEY",
+        "Authorization",
+        "Connect iMem",
+        "连接 iMem",
+    ]:
+        if required not in index:
+            violations.append(f"index.js missing expected authentication connector text: {required}")
     if not PACKAGED_SKILL.is_dir():
         violations.append("DSH package must include skills/imem-skill")
     elif _file_map(CANONICAL_SKILL) != _file_map(PACKAGED_SKILL):

@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-imem",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "iMem durable memory, schedules, and reminders for DeepSeek Harness.",
   "author": "iMem",
   "keywords": [
@@ -24,8 +24,11 @@
     "url": "git+https://github.com/hxliu4mcgill/iMem-skill.git",
     "directory": "plugins/imem-dsh"
   },
+  "type": "module",
+  "main": "index.js",
   "license": "MIT",
   "files": [
+    "index.js",
     "cordis.patch.yml",
     "README.md",
     "skills"

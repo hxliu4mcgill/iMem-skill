@@ -1,20 +1,22 @@
 # iMem Remote MCP Tool Specification
 
 This is the public Agent contract for production iMem remote MCP contract
-`2026-11-02`.
+`2026-11-26`.
 
 ## Production Connection
 
 ```text
 MCP URL: https://imem.xin/mcp
 Transport: Streamable HTTP
-Authentication: Authorization: Bearer <personal-api-key>
-OAuth: pending
+Authentication: OAuth Authorization Code with PKCE or Authorization: Bearer <personal-api-key>
+OAuth: available
 ```
 
-Create a Personal API Key at `https://imem.xin/app/api-keys`. The service
-derives user and workspace identity from that key. Never pass `workspace_id` in
-normal Agent requests.
+OAuth clients discover protected resource metadata at
+`https://imem.xin/.well-known/oauth-protected-resource/mcp`. Personal API Keys
+remain available at `https://imem.xin/app/api-keys`. The service derives user
+and workspace identity from the active credential. Never pass `workspace_id`
+in normal Agent requests.
 
 ## Canonical Resource Shape
 
@@ -316,7 +318,7 @@ deprecation and telemetry review.
 
 | Error code | Required behavior |
 |---|---|
-| `UNAUTHORIZED` | Check the configured API key. |
+| `UNAUTHORIZED` | Reconnect or check the configured credential. |
 | `FORBIDDEN` | Report the missing scope. |
 | `ENTRY_NOT_FOUND` | List again or ask the user to identify the Entry. |
 | `VALIDATION_FAILED` | Correct clear fields or ask for missing information. |
