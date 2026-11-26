@@ -2,15 +2,23 @@
   "name": "dsh-plugin-imem",
   "version": "0.1.0",
   "description": "iMem durable memory, schedules, and reminders for DeepSeek Harness.",
+  "author": "iMem",
   "keywords": [
+    "deepseek",
     "deepseek-harness",
+    "dsh",
     "dsh-plugin",
     "agent-skill",
     "mcp",
+    "durable-memory",
     "memory",
-    "reminder"
+    "schedule",
+    "reminders"
   ],
   "homepage": "https://imem.xin",
+  "bugs": {
+    "url": "https://github.com/hxliu4mcgill/iMem-skill/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hxliu4mcgill/iMem-skill.git",
