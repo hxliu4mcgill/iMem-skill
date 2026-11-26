@@ -5,12 +5,16 @@ Harness to the authenticated remote MCP service at `https://imem.xin/mcp`.
 
 ## Requirements
 
-- DeepSeek Harness `>=0.2.1-rc.1 <0.3.0`
+- DeepSeek Harness `>=0.2.3-alpha.1 <0.3.0`
 - An iMem account
 - Network access to `https://imem.xin/mcp`
 
 The package contains a small OAuth connector plus the canonical Skill files. It
 does not ship credentials or run an install script.
+
+OAuth account management first shipped in DeepSeek Harness `0.2.3-alpha.1`.
+Earlier builds can list and enable this Bundle but cannot show its account
+section or start MCP OAuth.
 
 ## Install
 
@@ -18,8 +22,11 @@ does not ship credentials or run an install script.
 
 1. Open **Plugins** and choose **Add plugin**.
 2. Enter `dsh-plugin-imem` and choose **Install**.
-3. Open the installed iMem plugin and choose **Connect iMem**.
-4. Approve access in the browser, return to DeepSeek Harness, and start a new
+3. Fully quit and reopen DeepSeek Harness. A newly installed or updated Bundle
+   joins the Desktop Profile only on its next start.
+4. Make sure the installed iMem plugin is enabled, then choose **Connect iMem**
+   from its account section. Enabling the plugin does not start OAuth by itself.
+5. Approve access in the browser, return to DeepSeek Harness, and start a new
    session.
 
 The package name works in the Desktop installer after the package has been
@@ -54,13 +61,15 @@ duplicate server names in the same scope.
 
 ## Upgrade and uninstall
 
-In Desktop, manage the installed package from the **Plugins** page. For the Web
-profile, use:
+In Desktop, manage the installed package from the **Plugins** page, then fully
+quit and reopen DeepSeek Harness after an update. For the Web profile, use:
 
 ```bash
 dsh plugin --profile web update dsh-plugin-imem
 dsh plugin --profile web remove dsh-plugin-imem
 ```
+
+Restart the Web profile after updating the Bundle.
 
 Sign out from the iMem account section before uninstalling if you also want DSH
 to delete its saved OAuth grant.

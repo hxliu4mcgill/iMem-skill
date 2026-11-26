@@ -215,12 +215,18 @@ Hermes' built-in memory provider.
 
 ### 2E. Install the DeepSeek Harness Plugin
 
+Requires DeepSeek Harness `>=0.2.3-alpha.1 <0.3.0`; earlier builds do not
+include the connector account UI or MCP OAuth flow.
+
 In DeepSeek Harness Desktop:
 
 1. Open **Plugins** and choose **Add plugin**.
 2. Enter `dsh-plugin-imem` and choose **Install**.
-3. Open the installed iMem plugin and choose **Connect iMem**.
-4. Approve access in the browser, return to DeepSeek Harness, and start a new
+3. Fully quit and reopen DeepSeek Harness so the new Bundle joins the Desktop
+   Profile.
+4. Make sure the installed iMem plugin is enabled, then choose **Connect iMem**
+   from its account section. Enabling the plugin does not start OAuth by itself.
+5. Approve access in the browser, return to DeepSeek Harness, and start a new
    session.
 
 For the CLI / Web profile:
@@ -377,14 +383,14 @@ hermes mcp test imem
 
 DeepSeek Harness:
 
-In Desktop, update the installed package from the **Plugins** page. For the Web
-profile:
+In Desktop, update the installed package from the **Plugins** page, then fully
+quit and reopen DeepSeek Harness. For the Web profile:
 
 ```bash
 dsh plugin --profile web update dsh-plugin-imem
 ```
 
-Start a new task or session after upgrading.
+Restart the Web profile, then start a new task or session after upgrading.
 
 ## Uninstall
 
