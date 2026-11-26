@@ -1,15 +1,6 @@
 - insert:
-    - id: imem-mcp
-      name: '@deepseek-ai/dsh-mcp-client'
-      inject: ['credentials']
-      config:
-        serverName: imem
-        transport: streamable-http
-        url: https://imem.xin/mcp
-        headers:
-          Authorization: 'Bearer ${credential:IMEM_API_KEY}'
-        expandTemplates: true
-        startupTimeoutMs: 30000
+    - id: imem-connector
+      name: dsh-plugin-imem
     - id: imem-skill-filesystem
       name: '@deepseek-ai/dsh-skill-filesystem'
       config:

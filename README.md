@@ -219,27 +219,21 @@ In DeepSeek Harness Desktop:
 
 1. Open **Plugins** and choose **Add plugin**.
 2. Enter `dsh-plugin-imem` and choose **Install**.
-3. Create or edit `%USERPROFILE%\.dsh\.env` on Windows (or `~/.dsh/.env` on
-   macOS and Linux) and add:
-
-   ```dotenv
-   IMEM_API_KEY=your-api-key
-   ```
-
-4. Completely restart DeepSeek Harness and start a new session.
+3. Open the installed iMem plugin and choose **Connect iMem**.
+4. Approve access in the browser, return to DeepSeek Harness, and start a new
+   session.
 
 For the CLI / Web profile:
 
-```powershell
-$env:IMEM_API_KEY = "your-api-key"
+```bash
 dsh plugin --profile web add dsh-plugin-imem
 dsh web
 ```
 
-The bundle installs the canonical iMem Skill and registers the authenticated
-Streamable HTTP MCP connection together. The key is resolved through the DSH
-credential provider and is not stored in the package. Keep `.dsh/.env` private
-and never commit it. Source and package details are under
+Open **Plugins**, select iMem, and choose **Connect iMem**. The bundle installs
+the canonical iMem Skill and registers the remote MCP connection together. DSH
+stores and refreshes the OAuth grant; no API Key or environment variable is
+required. Source and package details are under
 [`plugins/imem-dsh/`](plugins/imem-dsh/).
 
 ### Direct MCP alternative
@@ -297,9 +291,9 @@ A planned or protocol-compatible platform is not an installable promise.
 Skill release: v0.3.0
 Skill name: imem-skill
 Production MCP: https://imem.xin/mcp
-Production MCP contract: 2026-11-02
-Authentication: Personal API Key bearer token
-OAuth: pending
+Production MCP contract: 2026-11-26
+Authentication: OAuth Authorization Code with PKCE or Personal API Key bearer token
+OAuth: available
 ```
 
 The service must expose the behavior described in the
@@ -436,7 +430,7 @@ the integration's API Key in the Web App when it is no longer needed.
 
 - The project is experimental.
 - The repository does not deploy the iMem service or issue API keys.
-- OAuth is pending; current authentication uses user-created Personal API Keys.
+- OAuth is available for compatible MCP clients; Personal API Keys remain supported.
 - Reminder delivery channels depend on the deployed service.
 - Codex is the currently live-validated Agent path.
 - The Claude Code package and static contract are implemented; live install

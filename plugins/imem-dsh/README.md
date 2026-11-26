@@ -6,28 +6,21 @@ Harness to the authenticated remote MCP service at `https://imem.xin/mcp`.
 ## Requirements
 
 - DeepSeek Harness `>=0.2.1-rc.1 <0.3.0`
-- An iMem account and a dedicated Personal API Key
+- An iMem account
 - Network access to `https://imem.xin/mcp`
 
-The package contains configuration and Skill files only. It does not ship an
-iMem API Key or run an install script.
+The package contains a small OAuth connector plus the canonical Skill files. It
+does not ship credentials or run an install script.
 
 ## Install
-
-Create a Personal API Key at <https://imem.xin/app/api-keys>.
 
 ### DeepSeek Harness Desktop
 
 1. Open **Plugins** and choose **Add plugin**.
 2. Enter `dsh-plugin-imem` and choose **Install**.
-3. Add this line to `%USERPROFILE%\.dsh\.env` on Windows or `~/.dsh/.env` on
-   macOS and Linux:
-
-   ```dotenv
-   IMEM_API_KEY=your-api-key
-   ```
-
-4. Completely restart DeepSeek Harness, then start a new session.
+3. Open the installed iMem plugin and choose **Connect iMem**.
+4. Approve access in the browser, return to DeepSeek Harness, and start a new
+   session.
 
 The package name works in the Desktop installer after the package has been
 published to npm. During local development, the same dialog also accepts the
@@ -35,26 +28,15 @@ absolute path to this `plugins/imem-dsh` directory.
 
 ### CLI / Web profile
 
-Make the key available to the process that starts DeepSeek Harness, then install
-the bundle into the profile you use:
-
-```powershell
-$env:IMEM_API_KEY = "your-api-key"
-dsh plugin --profile web add dsh-plugin-imem
-dsh web
-```
-
-On macOS or Linux:
-
 ```bash
-export IMEM_API_KEY="your-api-key"
 dsh plugin --profile web add dsh-plugin-imem
 dsh web
 ```
 
-The secret is resolved through the DeepSeek Harness credential provider. It is
-not stored in this package or expanded into the raw plugin configuration. Keep
-the `.env` file private and never commit it.
+Open **Plugins**, select iMem, and choose **Connect iMem**. DeepSeek Harness
+performs OAuth Authorization Code with PKCE in the browser, stores the grant in
+its credential provider, and refreshes it when required. No API Key or
+environment variable is required.
 
 ## What the bundle adds
 
@@ -80,8 +62,8 @@ dsh plugin --profile web update dsh-plugin-imem
 dsh plugin --profile web remove dsh-plugin-imem
 ```
 
-Revoke the integration's API Key in the iMem Web App after uninstalling if the
-key is no longer needed.
+Sign out from the iMem account section before uninstalling if you also want DSH
+to delete its saved OAuth grant.
 
 ## Source and support
 

@@ -1,9 +1,19 @@
 {
-  "contract_version": "2026-11-02",
+  "contract_version": "2026-11-26",
   "production_url": "https://imem.xin/mcp",
   "transport": "streamable-http",
-  "authentication": "bearer-api-key",
-  "oauth_status": "pending",
+  "authentication": "oauth-or-bearer-api-key",
+  "oauth_status": "available",
+  "oauth": {
+    "protected_resource_metadata": "https://imem.xin/.well-known/oauth-protected-resource/mcp",
+    "authorization_server_metadata": "https://imem.xin/.well-known/oauth-authorization-server",
+    "authorization_endpoint": "https://imem.xin/authorize",
+    "token_endpoint": "https://imem.xin/token",
+    "registration_endpoint": "https://imem.xin/register",
+    "scopes": ["entries:read", "entries:write"],
+    "pkce": "S256",
+    "refresh_tokens": true
+  },
   "canonical_tools": [
     "imem_health",
     "imem_get_time_context",

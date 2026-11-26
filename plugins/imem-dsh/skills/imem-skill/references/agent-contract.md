@@ -21,9 +21,10 @@ IDs. Artifact remains a separate private deliverable resource.
 
 ## Authentication And Workspace
 
-Use Personal API Key bearer authentication over Streamable HTTP. Let the
-service derive `user_id`, `workspace_id`, client identity, and scopes from the
-key. Never pass `workspace_id` in normal Agent calls. OAuth remains pending.
+Use OAuth Authorization Code with PKCE or Personal API Key bearer authentication
+over Streamable HTTP. Let the service derive `user_id`, `workspace_id`, client
+identity, and scopes from the credential. Never pass `workspace_id` in normal
+Agent calls.
 
 Do not use service internals during normal work:
 
@@ -160,7 +161,7 @@ it.
 
 | Error code | Required Agent behavior |
 |---|---|
-| `UNAUTHORIZED` | Ask the user/operator to check API key configuration. |
+| `UNAUTHORIZED` | Ask the user/operator to reconnect or check authentication. |
 | `FORBIDDEN` | Report the missing scope. |
 | `ENTRY_NOT_FOUND` | List again or ask the user to identify the target. |
 | `VALIDATION_FAILED` | Fix clear fields or ask for missing information. |

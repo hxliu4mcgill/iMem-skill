@@ -181,7 +181,7 @@ its Public Link.
 Follow `references/agent-contract.md`. Minimum behavior:
 
 ```text
-UNAUTHORIZED          -> ask the user/operator to check the API key
+UNAUTHORIZED          -> ask the user/operator to reconnect or check authentication
 FORBIDDEN             -> report the missing scope
 ENTRY_NOT_FOUND       -> list again or ask the user to identify the target
 VALIDATION_FAILED     -> fix clear fields or ask for missing information

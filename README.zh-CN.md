@@ -203,26 +203,19 @@ Provider。
 
 1. 打开**插件**，选择**添加插件**。
 2. 输入 `dsh-plugin-imem`，然后选择**安装**。
-3. Windows 用户新建或编辑 `%USERPROFILE%\.dsh\.env`；macOS 和 Linux 用户编辑
-   `~/.dsh/.env`，加入：
-
-   ```dotenv
-   IMEM_API_KEY=your-api-key
-   ```
-
-4. 完全退出并重新启动 DeepSeek Harness，然后新建会话。
+3. 打开已安装的 iMem 插件，选择**连接 iMem**。
+4. 在浏览器中确认授权，返回 DeepSeek Harness，然后新建会话。
 
 如果使用 CLI / Web profile：
 
-```powershell
-$env:IMEM_API_KEY = "your-api-key"
+```bash
 dsh plugin --profile web add dsh-plugin-imem
 dsh web
 ```
 
-这个 bundle 会同时安装 canonical iMem Skill，并注册需要认证的 Streamable HTTP MCP
-连接。密钥由 DSH credential provider 解析，不会存入安装包。请勿提交 `.dsh/.env`，
-也不要向他人公开该文件。源码和包配置位于
+打开**插件**，选择 iMem，再点击**连接 iMem**。这个 bundle 会同时安装 canonical
+iMem Skill 并注册远程 MCP 连接。DSH 会保存并自动刷新 OAuth 授权，不需要 API Key
+或环境变量。源码和包配置位于
 [`plugins/imem-dsh/`](plugins/imem-dsh/)。
 
 ### 仅连接 MCP
@@ -277,9 +270,9 @@ codex mcp add imem --url https://imem.xin/mcp --bearer-token-env-var IMEM_API_KE
 Skill 版本：v0.3.0
 Skill 名称：imem-skill
 生产 MCP：https://imem.xin/mcp
-生产 MCP 合同：2026-11-02
-认证方式：Personal API Key Bearer Token
-OAuth：pending
+生产 MCP 合同：2026-11-26
+认证方式：OAuth Authorization Code with PKCE 或 Personal API Key Bearer Token
+OAuth：available
 ```
 
 服务端必须提供
@@ -410,7 +403,7 @@ dsh plugin --profile web remove dsh-plugin-imem
 
 - 项目仍处于实验阶段。
 - 本仓库不部署 iMem 服务，也不签发 API Key。
-- OAuth 尚未实现；当前使用用户自行创建的 Personal API Key。
+- 兼容的 MCP 客户端已支持 OAuth；Personal API Key 仍可继续使用。
 - 提醒发送渠道取决于已部署服务。
 - Codex 是当前经过线上实机验证的 Agent 路径。
 - Claude Code 已完成安装包和静态契约实现；仍需在安装了 Claude Code 的环境中实机验证。

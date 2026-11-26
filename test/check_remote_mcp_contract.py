@@ -69,16 +69,29 @@ def main() -> int:
     legacy_aliases = set(contract.get("legacy_aliases") or [])
     public_tools = set(contract.get("public_tools") or [])
 
-    if contract.get("contract_version") != "2026-11-02":
-        violations.append("contract_version must be 2026-11-02")
+    if contract.get("contract_version") != "2026-11-26":
+        violations.append("contract_version must be 2026-11-26")
     if contract.get("production_url") != "https://imem.xin/mcp":
         violations.append("contract production_url must be https://imem.xin/mcp")
     if contract.get("transport") != "streamable-http":
         violations.append("contract transport must be streamable-http")
-    if contract.get("authentication") != "bearer-api-key":
-        violations.append("contract authentication must be bearer-api-key")
-    if contract.get("oauth_status") != "pending":
-        violations.append("contract oauth_status must be pending")
+    if contract.get("authentication") != "oauth-or-bearer-api-key":
+        violations.append("contract authentication must include OAuth and API keys")
+    if contract.get("oauth_status") != "available":
+        violations.append("contract oauth_status must be available")
+    oauth = contract.get("oauth") or {}
+    expected_oauth = {
+        "protected_resource_metadata": "https://imem.xin/.well-known/oauth-protected-resource/mcp",
+        "authorization_server_metadata": "https://imem.xin/.well-known/oauth-authorization-server",
+        "authorization_endpoint": "https://imem.xin/authorize",
+        "token_endpoint": "https://imem.xin/token",
+        "registration_endpoint": "https://imem.xin/register",
+        "scopes": ["entries:read", "entries:write"],
+        "pkce": "S256",
+        "refresh_tokens": True,
+    }
+    if oauth != expected_oauth:
+        violations.append("contract OAuth metadata differs from the deployed contract")
     if contract.get("optimistic_concurrency") != EXPECTED_OPTIMISTIC_CONCURRENCY:
         violations.append("contract optimistic_concurrency differs from revision contract")
 
