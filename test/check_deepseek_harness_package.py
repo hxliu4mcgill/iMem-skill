@@ -73,15 +73,14 @@ def main() -> int:
         "https://imem.xin/mcp",
         "mcp-client/imem",
         "entries:read entries:write",
+        "startAuthorization",
+        "IMEM_API_KEY",
+        "Authorization",
         "Connect iMem",
         "连接 iMem",
     ]:
         if required not in index:
-            violations.append(f"index.js missing expected OAuth connector text: {required}")
-    for forbidden in ["IMEM_API_KEY", "Authorization:"]:
-        if forbidden in index or forbidden in patch:
-            violations.append(f"DSH OAuth connector must not embed API-key auth: {forbidden}")
-
+            violations.append(f"index.js missing expected authentication connector text: {required}")
     if not PACKAGED_SKILL.is_dir():
         violations.append("DSH package must include skills/imem-skill")
     elif _file_map(CANONICAL_SKILL) != _file_map(PACKAGED_SKILL):

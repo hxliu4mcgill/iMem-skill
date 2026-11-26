@@ -1,9 +1,10 @@
-/** iMem OAuth connector for DeepSeek Harness Desktop and Web. */
+/** Adaptive iMem connector for DeepSeek Harness Desktop and Web. */
 export const name = 'imem-connector'
 export const inject = ['mcpManager']
 
 const SERVER_NAME = 'imem'
 const CREDENTIAL_KEY = 'mcp-client/imem'
+const API_KEY_REF = '${credential:IMEM_API_KEY}'
 const PACKAGE_NAME = 'dsh-plugin-imem'
 const text = (zh, en) => ({ zh, en })
 
@@ -34,16 +35,17 @@ const COPY = {
 }
 
 export function apply(ctx) {
+  const oauthAvailable = typeof ctx.mcpManager.startAuthorization === 'function'
   ctx.mcpManager.register(SERVER_NAME, {
     transport: 'streamable-http',
     url: 'https://imem.xin/mcp',
-    oauth: {
-      credentialKey: CREDENTIAL_KEY,
-      scope: 'entries:read entries:write',
-    },
+    ...(oauthAvailable
+      ? { oauth: { credentialKey: CREDENTIAL_KEY, scope: 'entries:read entries:write' } }
+      : { headers: { Authorization: `Bearer ${API_KEY_REF}` } }),
     startupTimeoutMs: 30_000,
   })
 
+  if (!oauthAvailable) return
   ctx.inject(['mcpAccounts'], (scope) => {
     scope.effect(
       () => scope.mcpAccounts.register({ server: SERVER_NAME, packageName: PACKAGE_NAME, copy: COPY }),

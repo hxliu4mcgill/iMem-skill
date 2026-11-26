@@ -215,8 +215,12 @@ Hermes' built-in memory provider.
 
 ### 2E. Install the DeepSeek Harness Plugin
 
-Requires DeepSeek Harness `>=0.2.3-alpha.1 <0.3.0`; earlier builds do not
-include the connector account UI or MCP OAuth flow.
+Requires DeepSeek Harness `>=0.2.1-rc.1 <0.3.0`. The same package
+automatically selects the authentication mode supported by the DSH runtime:
+
+- DSH `>=0.2.3-alpha.1`: OAuth through the iMem account section.
+- DSH `0.2.1` and `0.2.2`: Personal API Key fallback through the DSH
+  credential named `IMEM_API_KEY`.
 
 In DeepSeek Harness Desktop:
 
@@ -224,10 +228,13 @@ In DeepSeek Harness Desktop:
 2. Enter `dsh-plugin-imem` and choose **Install**.
 3. Fully quit and reopen DeepSeek Harness so the new Bundle joins the Desktop
    Profile.
-4. Make sure the installed iMem plugin is enabled, then choose **Connect iMem**
-   from its account section. Enabling the plugin does not start OAuth by itself.
-5. Approve access in the browser, return to DeepSeek Harness, and start a new
-   session.
+4. Make sure the installed iMem plugin is enabled.
+5. Authenticate using the UI available in your version:
+   - If an account section is shown, choose **Connect iMem** and approve OAuth
+     access in the browser.
+   - If no account section is shown, configure `IMEM_API_KEY` in the DSH
+     credential store.
+6. Fully restart DSH after adding a credential, then start a new session.
 
 For the CLI / Web profile:
 
@@ -236,10 +243,10 @@ dsh plugin --profile web add dsh-plugin-imem
 dsh web
 ```
 
-Open **Plugins**, select iMem, and choose **Connect iMem**. The bundle installs
-the canonical iMem Skill and registers the remote MCP connection together. DSH
-stores and refreshes the OAuth grant; no API Key or environment variable is
-required. Source and package details are under
+The bundle installs the canonical iMem Skill and registers the remote MCP
+connection together. OAuth grants are stored and refreshed by compatible DSH
+versions; older versions use the configured Personal API Key. Detailed legacy
+credential instructions and package information are under
 [`plugins/imem-dsh/`](plugins/imem-dsh/).
 
 ### Direct MCP alternative

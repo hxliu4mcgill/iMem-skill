@@ -5,16 +5,18 @@ Harness to the authenticated remote MCP service at `https://imem.xin/mcp`.
 
 ## Requirements
 
-- DeepSeek Harness `>=0.2.3-alpha.1 <0.3.0`
+- DeepSeek Harness `>=0.2.1-rc.1 <0.3.0`
 - An iMem account
 - Network access to `https://imem.xin/mcp`
 
-The package contains a small OAuth connector plus the canonical Skill files. It
-does not ship credentials or run an install script.
+The package contains an adaptive connector plus the canonical Skill files. It
+selects the best authentication mode supported by the installed DSH runtime:
 
-OAuth account management first shipped in DeepSeek Harness `0.2.3-alpha.1`.
-Earlier builds can list and enable this Bundle but cannot show its account
-section or start MCP OAuth.
+- DSH `>=0.2.3-alpha.1`: OAuth account connection with no API Key.
+- DSH `0.2.1` and `0.2.2`: Personal API Key fallback through the DSH
+  credential named `IMEM_API_KEY`.
+
+The package does not ship credentials or run an install script.
 
 ## Install
 
@@ -24,14 +26,35 @@ section or start MCP OAuth.
 2. Enter `dsh-plugin-imem` and choose **Install**.
 3. Fully quit and reopen DeepSeek Harness. A newly installed or updated Bundle
    joins the Desktop Profile only on its next start.
-4. Make sure the installed iMem plugin is enabled, then choose **Connect iMem**
-   from its account section. Enabling the plugin does not start OAuth by itself.
-5. Approve access in the browser, return to DeepSeek Harness, and start a new
-   session.
+4. Make sure the installed iMem plugin is enabled.
+5. Complete the authentication path shown by your DSH version:
+   - If the plugin has an account section, choose **Connect iMem** and approve
+     access in the browser.
+   - If no account section is shown, configure the `IMEM_API_KEY` credential
+     as described below.
+6. Fully restart DSH after adding a credential, then start a new session.
 
 The package name works in the Desktop installer after the package has been
 published to npm. During local development, the same dialog also accepts the
 absolute path to this `plugins/imem-dsh` directory.
+
+### Personal API Key fallback
+
+On DSH without the account section, create a Personal API Key at
+<https://imem.xin/app/api-keys> and add it to `~/.dsh/.credentials.yaml`:
+
+```yaml
+version: 1
+refs:
+  IMEM_API_KEY: your-personal-api-key
+records: {}
+```
+
+If that file already exists, preserve its other `refs` and `records`; only
+add `IMEM_API_KEY` under `refs`.
+
+Alternatively, add `IMEM_API_KEY=your-personal-api-key` to `~/.dsh/.env`,
+then fully quit and reopen DSH.
 
 ### CLI / Web profile
 
@@ -40,10 +63,11 @@ dsh plugin --profile web add dsh-plugin-imem
 dsh web
 ```
 
-Open **Plugins**, select iMem, and choose **Connect iMem**. DeepSeek Harness
-performs OAuth Authorization Code with PKCE in the browser, stores the grant in
-its credential provider, and refreshes it when required. No API Key or
-environment variable is required.
+Open **Plugins** and select iMem. When an account section is available, choose
+**Connect iMem**; DSH performs OAuth Authorization Code with PKCE, stores the
+grant, and refreshes it when required. When no account section is available,
+configure `IMEM_API_KEY` before starting `dsh web`. The connector selects the
+matching mode automatically.
 
 ## What the bundle adds
 
@@ -71,8 +95,10 @@ dsh plugin --profile web remove dsh-plugin-imem
 
 Restart the Web profile after updating the Bundle.
 
-Sign out from the iMem account section before uninstalling if you also want DSH
-to delete its saved OAuth grant.
+In OAuth mode, sign out from the iMem account section before uninstalling if
+you also want DSH to delete its saved grant. In API Key mode, remove
+`IMEM_API_KEY` from the DSH credential store separately when it is no longer
+needed.
 
 ## Source and support
 
